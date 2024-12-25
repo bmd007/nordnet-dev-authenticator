@@ -26,12 +26,12 @@ public class DevAuthenticatorApplication {
     }
 
     @GetMapping
-    public ResponseEntity openSimulatorWithAuthzCode(@RequestParam String code) throws IOException {
+    public String openSimulatorWithAuthzCode(@RequestParam String code) throws IOException {
         String commandToLunchSimulator = """
                 xcrun simctl launch booted com.nordnet.Nordnet -entraIdAuthzCode "%s"
                 """.formatted(code);
 		Process p = Runtime.getRuntime().exec(commandToLunchSimulator);
-		return ResponseEntity.ok(p.info());
+		return p.info().toString();
     }
 
     @EventListener(ApplicationReadyEvent.class)
