@@ -24,7 +24,7 @@ public class DevAuthenticatorApplication {
 		SpringApplicationBuilder builder = new SpringApplicationBuilder(DevAuthenticatorApplication.class);
 		builder.headless(false);
 		builder.bannerMode(org.springframework.boot.Banner.Mode.OFF);
-		ConfigurableApplicationContext context = builder.run(args);
+		builder.run(args);
 	}
 
 	@GetMapping
