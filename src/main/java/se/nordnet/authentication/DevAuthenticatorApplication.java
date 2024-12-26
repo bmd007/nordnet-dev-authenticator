@@ -32,7 +32,7 @@ public class DevAuthenticatorApplication {
         //todo close currently open nordnet app in emulator
         //todo support android simulator?!
 		Process p = Runtime.getRuntime().exec(commandToLunchSimulator);
-		return p.info().toString();
+		return "Close this tab and check your emulator";
     }
 
     @EventListener(ApplicationReadyEvent.class)
