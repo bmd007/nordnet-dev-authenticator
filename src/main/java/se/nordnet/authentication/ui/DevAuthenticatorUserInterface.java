@@ -10,24 +10,33 @@ import se.nordnet.authentication.property.CustomerProperties;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Desktop;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.Image;
 import java.net.URI;
+import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Component
 public class DevAuthenticatorUserInterface {
 
     private final CustomerProperties customerProperties;
-
     private final JFrame frame = new JFrame("Nordnet Dev Authenticator");
     private final Desktop desktop = Desktop.getDesktop();
+    private final JPanel loginButtonsPanel = new JPanel(new GridLayout(0, 1, 15, 25));
 
     public DevAuthenticatorUserInterface(CustomerProperties customerProperties) {
         this.customerProperties = customerProperties;
@@ -35,64 +44,122 @@ public class DevAuthenticatorUserInterface {
 
     @EventListener(ApplicationReadyEvent.class)
     public void start() {
-        JPanel userAccountsPanel = new JPanel(new GridLayout(0, 2, 15, 25));
-        customerProperties.customers()
-                .stream().map(this::createLoginCard)
-                .forEach(userAccountsPanel::add);
-        frame.getContentPane().add(userAccountsPanel);
+        frame.getContentPane().add(createHeader(), BorderLayout.NORTH);
+        frame.getContentPane().add(loginButtonsPanel, BorderLayout.CENTER);
+
+        renderCustomerCards(customerProperties.customers().subList(0, 3));
 
         frame.setSize(1024, 800);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
     }
 
+    private JPanel createHeader() {
+        JPanel header = new JPanel();
+        header.setLayout(new GridLayout(2, 1, 1, 1));
+        header.setAlignmentX(0.5f);
+        header.setBorder(BorderFactory.createEtchedBorder());
+
+        ImageIcon logoIcon = new ImageIcon(getClass().getResource("/nordnet-logo.png"));
+        Image image = logoIcon.getImage();
+        Image scaledImage = image.getScaledInstance(logoIcon.getIconWidth() / 3, logoIcon.getIconHeight() / 3, Image.SCALE_SMOOTH);
+        logoIcon = new ImageIcon(scaledImage);
+        JLabel logoLabel = new JLabel(logoIcon);
+        logoLabel.setAlignmentX(0f);
+
+        logoLabel.setSize(30, 30);
+        header.add(logoLabel);
+
+        header.add(createSearchBar());
+        return header;
+    }
+
+    private JPanel createSearchBar() {
+        JPanel searchBar = new JPanel();
+        searchBar.setLayout(new BoxLayout(searchBar, BoxLayout.X_AXIS));
+        JTextField searchField = new JTextField();
+        searchField.setMaximumSize(new Dimension(200, 30));
+        searchField.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                filterCustomers(searchField.getText());
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                filterCustomers(searchField.getText());
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                filterCustomers(searchField.getText());
+            }
+        });
+        searchBar.add(new JLabel("Search: "));
+        searchBar.add(searchField);
+        return searchBar;
+    }
+
+    private void filterCustomers(String query) {
+        List<Customer> filteredCustomers = customerProperties.customers().stream()
+                .filter(customer -> customer.name().toLowerCase().contains(query.toLowerCase()) ||
+                        customer.id().toLowerCase().contains(query.toLowerCase()))
+                .toList();
+        filteredCustomers = filteredCustomers.isEmpty() ? customerProperties.customers().subList(0, 3) : filteredCustomers;
+        renderCustomerCards(filteredCustomers);
+    }
+
+    private void renderCustomerCards(List<Customer> customers) {
+        loginButtonsPanel.removeAll();
+        customers.stream().map(this::createLoginCard).forEach(loginButtonsPanel::add);
+        loginButtonsPanel.revalidate();
+        loginButtonsPanel.repaint();
+    }
+
     private JPanel createLoginCard(Customer customer) {
-        JPanel card = new JPanel();
-        card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
-        card.setAlignmentX(0.5f);
-        card.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
+        JPanel row = new JPanel(null); // Set layout to null
+        row.setPreferredSize(new Dimension(1024, 60)); // Set preferred size for the row
 
-        card.add(createStyledLabel(customer.name() + " in " + customer.country()));
-
-        JPanel buttonPanel = new JPanel(new GridLayout(2, 2, 10, 10));
+        JLabel label = createStyledLabel(customer.name() + " in " + customer.country());
+        label.setBounds(10, 10, 200, 40); // Set bounds for the label
+        row.add(label);
 
         JButton iosButton = createStyledButton("IOS Emulator");
+        iosButton.setBounds(220, 10, 200, 40); // Set bounds for the button
         iosButton.addActionListener(e -> openBrowserForLoginOnIosEmulator(customer));
-        buttonPanel.add(iosButton);
+        row.add(iosButton);
 
         JButton androidButton = createStyledButton("Android Simulator: TODO");
-        buttonPanel.add(androidButton);
+        androidButton.setBounds(430, 10, 200, 40); // Set bounds for the button
+        row.add(androidButton);
 
         JButton webAppNextTestButton = createStyledButton("Webapp next test");
+        webAppNextTestButton.setBounds(640, 10, 200, 40); // Set bounds for the button
         webAppNextTestButton.addActionListener(e -> openBrowserForLoginOnWebAppNextTestEnv(customer));
-        buttonPanel.add(webAppNextTestButton);
+        row.add(webAppNextTestButton);
 
         JButton webappNextLocalButton = createStyledButton("Webapp next local");
+        webappNextLocalButton.setBounds(850, 10, 200, 40); // Set bounds for the button
         webappNextLocalButton.addActionListener(e -> openBrowserForLoginOnWebAppNextLocal(customer));
-        buttonPanel.add(webappNextLocalButton);
+        row.add(webappNextLocalButton);
 
-        card.add(buttonPanel);
-
-        return card;
+        return row;
     }
 
     private JLabel createStyledLabel(String text) {
         JLabel label = new JLabel(text);
-        label.setAlignmentX(0.5f);
-        label.setFont(new Font("Arial", Font.BOLD, 13));
-        label.setForeground(new Color(50, 100, 150));
-        label.setBorder(BorderFactory.createRaisedBevelBorder());
+        Font arial = new Font("Arial", Font.BOLD, 13);
+        label.setFont(arial);
         return label;
     }
 
     private JButton createStyledButton(String text) {
         JButton button = new JButton(text);
-        button.setAlignmentX(0.5f);
-        button.setFont(new Font("Arial", Font.BOLD, 11));
-        button.setForeground(Color.BLACK);
-        button.setFocusPainted(false);
-        button.setContentAreaFilled(false);
-        button.setOpaque(true);
+        button.setFont(new Font("Arial", Font.BOLD, 13));
+        Dimension buttonSize = new Dimension(200, 50); // Set your desired fixed size
+        button.setPreferredSize(buttonSize);
+        button.setMinimumSize(buttonSize);
+        button.setMaximumSize(buttonSize);
         return button;
     }
 
