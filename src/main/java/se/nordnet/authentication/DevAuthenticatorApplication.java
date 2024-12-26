@@ -37,12 +37,24 @@ public class DevAuthenticatorApplication {
 
     @EventListener(ApplicationReadyEvent.class)
     public void start() {
-        String url = "https://login.microsoftonline.com/eae4202d-7ff0-44f1-b130-3afd5da7b347/oauth2/v2.0/authorize?redirect_uri=http%3A%2F%2Flocalhost%3A9070&client_id=fe88cb91-1d7f-4d8e-a4e7-b2287bce567b&response_type=code&nonce=ZTlhN2I4OWQtMWEyYi00ZjQ0LTg3YWMtNjk4Yzg5YmM3ZTEx&scope=api://fe88cb91-1d7f-4d8e-a4e7-b2287bce567b/Read%20openid&state=MICROSOFT_ENTRAID_DEV_AUTHENTICATOR";
-        Desktop desktop = Desktop.getDesktop();
-        try {
-            desktop.browse(new URI(url));
-        } catch (IOException | URISyntaxException e) {
-            e.printStackTrace();
-        }
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            javax.swing.JFrame frame = new javax.swing.JFrame("Dev Authenticator");
+            javax.swing.JButton button = new javax.swing.JButton("login in simulator as robson");
+
+            button.addActionListener(e -> {
+                String url = "https://login.microsoftonline.com/eae4202d-7ff0-44f1-b130-3afd5da7b347/oauth2/v2.0/authorize?redirect_uri=http%3A%2F%2Flocalhost%3A9070&client_id=fe88cb91-1d7f-4d8e-a4e7-b2287bce567b&response_type=code&nonce=ZTlhN2I4OWQtMWEyYi00ZjQ0LTg3YWMtNjk4Yzg5YmM3ZTEx&scope=api://fe88cb91-1d7f-4d8e-a4e7-b2287bce567b/Read%20openid&state=MICROSOFT_ENTRAID_DEV_AUTHENTICATOR";
+                Desktop desktop = Desktop.getDesktop()  ;
+                try {
+                    desktop.browse(new URI(url));
+                } catch (IOException | URISyntaxException ex) {
+                    ex.printStackTrace();
+                }
+            });
+
+            frame.getContentPane().add(button);
+            frame.setSize(300, 200);
+            frame.setDefaultCloseOperation(javax.swing.JFrame.EXIT_ON_CLOSE);
+            frame.setVisible(true);
+        });
     }
 }
