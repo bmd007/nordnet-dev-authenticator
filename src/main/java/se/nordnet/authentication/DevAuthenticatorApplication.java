@@ -49,18 +49,19 @@ public class DevAuthenticatorApplication {
     private JPanel createCard(UserAccount userAccount) {
         JPanel card = new JPanel();
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
-        JLabel nameLabel = new JLabel(userAccount.name());
+        JLabel nameLabel = new JLabel(userAccount.name() + " in " + userAccount.countryCode());
         card.add(nameLabel);
-        JButton button = new JButton("IOS Emulator: "+ userAccount.countryCode());
+
+        JButton button = new JButton("IOS Emulator");
         button.addActionListener(e -> openBrowser(getAuthorizationUrlForLoginOnEmulator(userAccount)));
         card.add(button);
         card.add(button);
 
-        JButton button2 = new JButton("Webapp next test: " + userAccount.countryCode());
+        JButton button2 = new JButton("Webapp next test");
         button2.addActionListener(e -> openBrowser(getAuthorizationUrlForLoginOnWebAppNextTestEnv(userAccount)));
         card.add(button2);
 
-        JButton button3 = new JButton("Webapp next local: " + userAccount.countryCode());
+        JButton button3 = new JButton("Webapp next local");
         button3.addActionListener(e -> openBrowser(getAuthorizationUrlForLoginOnWebAppNextLocal(userAccount)));
         card.add(button3);
 
