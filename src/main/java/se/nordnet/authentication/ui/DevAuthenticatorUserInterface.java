@@ -8,12 +8,15 @@ import org.springframework.web.util.UriComponentsBuilder;
 import se.nordnet.authentication.domain.Customer;
 import se.nordnet.authentication.property.CustomerProperties;
 
+import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import java.awt.Color;
 import java.awt.Desktop;
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.net.URI;
 
@@ -32,15 +35,12 @@ public class DevAuthenticatorUserInterface {
 
     @EventListener(ApplicationReadyEvent.class)
     public void start() {
-        JPanel mainPanel = new JPanel(new GridLayout(1, 2, 10, 3)); // 1 row, 2 columns, 10px gaps
-
-        JPanel userAccountsPanel = new JPanel(new GridLayout(0, 2, 10, 3)); // 2 columns, variable rows, 10px gaps
+        JPanel userAccountsPanel = new JPanel(new GridLayout(0, 2, 15, 25));
         customerProperties.customers()
                 .stream().map(this::createLoginCard)
                 .forEach(userAccountsPanel::add);
-        mainPanel.add(userAccountsPanel);
+        frame.getContentPane().add(userAccountsPanel);
 
-        frame.getContentPane().add(mainPanel);
         frame.setSize(1024, 800);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
@@ -49,25 +49,51 @@ public class DevAuthenticatorUserInterface {
     private JPanel createLoginCard(Customer customer) {
         JPanel card = new JPanel();
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
-        JLabel nameLabel = new JLabel(customer.name() + " in " + customer.country());
-        card.add(nameLabel);
+        card.setAlignmentX(0.5f);
+        card.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
 
-        JButton iosButton = new JButton("IOS Emulator");
+        card.add(createStyledLabel(customer.name() + " in " + customer.country()));
+
+        JPanel buttonPanel = new JPanel(new GridLayout(2, 2, 10, 10));
+
+        JButton iosButton = createStyledButton("IOS Emulator");
         iosButton.addActionListener(e -> openBrowserForLoginOnIosEmulator(customer));
-        card.add(iosButton);
+        buttonPanel.add(iosButton);
 
-        JButton androidButton = new JButton("Android Simulator: TODO");
-        card.add(androidButton);
+        JButton androidButton = createStyledButton("Android Simulator: TODO");
+        buttonPanel.add(androidButton);
 
-        JButton webAppNextTestButton = new JButton("Webapp next test");
+        JButton webAppNextTestButton = createStyledButton("Webapp next test");
         webAppNextTestButton.addActionListener(e -> openBrowserForLoginOnWebAppNextTestEnv(customer));
-        card.add(webAppNextTestButton);
+        buttonPanel.add(webAppNextTestButton);
 
-        JButton webappNextLocalButton = new JButton("Webapp next local");
+        JButton webappNextLocalButton = createStyledButton("Webapp next local");
         webappNextLocalButton.addActionListener(e -> openBrowserForLoginOnWebAppNextLocal(customer));
-        card.add(webappNextLocalButton);
+        buttonPanel.add(webappNextLocalButton);
+
+        card.add(buttonPanel);
 
         return card;
+    }
+
+    private JLabel createStyledLabel(String text) {
+        JLabel label = new JLabel(text);
+        label.setAlignmentX(0.5f);
+        label.setFont(new Font("Arial", Font.BOLD, 13));
+        label.setForeground(new Color(50, 100, 150));
+        label.setBorder(BorderFactory.createRaisedBevelBorder());
+        return label;
+    }
+
+    private JButton createStyledButton(String text) {
+        JButton button = new JButton(text);
+        button.setAlignmentX(0.5f);
+        button.setFont(new Font("Arial", Font.BOLD, 11));
+        button.setForeground(Color.BLACK);
+        button.setFocusPainted(false);
+        button.setContentAreaFilled(false);
+        button.setOpaque(true);
+        return button;
     }
 
     private void openBrowserForLoginOnIosEmulator(Customer customer) {
@@ -76,12 +102,12 @@ public class DevAuthenticatorUserInterface {
     }
 
     private void openBrowserForLoginOnWebAppNextTestEnv(Customer customer) {
-        URI authorizationUri =  getAuthorizationUrl(customer.getBase64Id(), "https://www.nordnet-test.%s/login".formatted(customer.country()), "MICROSOFT_ENTRAID_CARISMA");
+        URI authorizationUri = getAuthorizationUrl(customer.getBase64Id(), "https://www.nordnet-test.%s/login".formatted(customer.country()), "MICROSOFT_ENTRAID_CARISMA");
         openBrowser(authorizationUri);
     }
 
     private void openBrowserForLoginOnWebAppNextLocal(Customer customer) {
-        URI authorizationUri =  getAuthorizationUrl(customer.getBase64Id(), "https://www.nordnet-local.%s:8081/login".formatted(customer.country()), "MICROSOFT_ENTRAID_CARISMA");
+        URI authorizationUri = getAuthorizationUrl(customer.getBase64Id(), "https://www.nordnet-local.%s:8081/login".formatted(customer.country()), "MICROSOFT_ENTRAID_CARISMA");
         openBrowser(authorizationUri);
     }
 
