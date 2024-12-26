@@ -10,10 +10,19 @@ import org.springframework.web.util.UriComponentsBuilder;
 import se.nordnet.authentication.domain.UserAccount;
 import se.nordnet.authentication.property.UserAccountsProperties;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
+
 
 @SpringBootApplication
 @ConfigurationPropertiesScan
@@ -32,18 +41,56 @@ public class DevAuthenticatorApplication {
     private UserAccountsProperties userAccountsProperties;
 
     JFrame frame = new JFrame("Dev Authenticator");
-    Desktop desktop = Desktop.getDesktop();
+    java.awt.Desktop desktop = java.awt.Desktop.getDesktop();
 
     @EventListener(ApplicationReadyEvent.class)
     public void start() {
-        JPanel panel = new JPanel(new GridLayout(0, 2, 10, 10)); // 2 columns, variable rows, 10px gaps
+        JPanel mainPanel = new JPanel(new java.awt.GridLayout(1, 2, 10, 10)); // 1 row, 2 columns, 10px gaps
+
+        JPanel userAccountsPanel = new JPanel(new java.awt.GridLayout(0, 2, 10, 10)); // 2 columns, variable rows, 10px gaps
         for (UserAccount userAccount : userAccountsProperties.userAccounts()) {
-            panel.add(createCard(userAccount));
+            userAccountsPanel.add(createCard(userAccount));
         }
-        frame.getContentPane().add(panel);
+        mainPanel.add(userAccountsPanel);
+
+        mainPanel.add(createEmulatorListPanel());
+
+        frame.getContentPane().add(mainPanel);
         frame.setSize(1024, 800);
-        frame.setDefaultCloseOperation(javax.swing.JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
+    }
+
+    private JPanel createEmulatorListPanel() {
+        JPanel emulatorPanel = new JPanel();
+        emulatorPanel.setLayout(new BoxLayout(emulatorPanel, BoxLayout.Y_AXIS));
+        JLabel titleLabel = new JLabel("Running iOS Emulators:");
+        emulatorPanel.add(titleLabel);
+
+        List<String> emulators = getRunningIOSEmulators();
+        for (String emulator : emulators) {
+            JLabel emulatorLabel = new JLabel(emulator);
+            emulatorPanel.add(emulatorLabel);
+        }
+
+        return emulatorPanel;
+    }
+
+    public List<String> getRunningIOSEmulators() {
+        List<String> emulators = new ArrayList<>();
+        try {
+            Process process = Runtime.getRuntime().exec("xcrun simctl list devices booted");
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.contains("(Booted)")) {
+                    emulators.add(line.trim());
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return emulators;
     }
 
     private JPanel createCard(UserAccount userAccount) {
