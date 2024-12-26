@@ -1,0 +1,10 @@
+spring.application.name: dev-authenticator
+server.port: 9070
+test:
+  env:
+    customer-ids:
+      user-accounts:
+        - name: robsan
+          customerId: "e9a7b89d-1a2b-4f44-87ac-698c89bc7e11"
+        - name: user2
+          customerId: "bbbbb"
