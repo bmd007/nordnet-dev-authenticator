@@ -1,4 +1,4 @@
-package se.nordnet.authentication.dev_authenticator;
+package se.nordnet.authentication;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
