@@ -34,7 +34,7 @@ public class DevAuthenticatorUserInterface {
 
         JPanel userAccountsPanel = new JPanel(new GridLayout(0, 2, 10, 3)); // 2 columns, variable rows, 10px gaps
         customerProperties.customers()
-                .stream().map(this::createUserLoginCard)
+                .stream().map(this::createLoginCard)
                 .forEach(userAccountsPanel::add);
         mainPanel.add(userAccountsPanel);
 
@@ -44,7 +44,7 @@ public class DevAuthenticatorUserInterface {
         frame.setVisible(true);
     }
 
-    private JPanel createUserLoginCard(Customer customer) {
+    private JPanel createLoginCard(Customer customer) {
         JPanel card = new JPanel();
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
         JLabel nameLabel = new JLabel(customer.name() + " in " + customer.country());
