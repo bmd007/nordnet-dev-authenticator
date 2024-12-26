@@ -23,7 +23,7 @@ public class DevAuthenticatorUserInterface {
 
     private final CustomerProperties customerProperties;
 
-    private final JFrame frame = new JFrame("Dev Authenticator");
+    private final JFrame frame = new JFrame("Nordnet Dev Authenticator");
     private final Desktop desktop = Desktop.getDesktop();
 
     public DevAuthenticatorUserInterface(CustomerProperties customerProperties) {
