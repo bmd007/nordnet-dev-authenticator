@@ -5,6 +5,11 @@ test:
     customer-ids:
       user-accounts:
         - name: robsan
-          customerId: "e9a7b89d-1a2b-4f44-87ac-698c89bc7e11"
-        - name: user2
-          customerId: "bbbbb"
+          customerId: e9a7b89d-1a2b-4f44-87ac-698c89bc7e11
+          country-code: SE
+        - name: nextuser-se-1
+          customerId: d73b42b5-6d7b-4946-8485-add66228c123
+          country-code: SE
+        - name: shareville-no-2
+          customerId: 7270ff4e-0da6-4c24-b0ad-b7879037e8f6
+          country-code: "NO"
