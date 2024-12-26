@@ -29,6 +29,8 @@ public class DevAuthenticatorApplication {
         String commandToLunchSimulator = """
                 xcrun simctl launch booted com.nordnet.Nordnet -entraIdAuthzCode "%s"
                 """.formatted(code);
+        //todo close currently open nordnet app in emulator
+        //todo support android simulator?!
 		Process p = Runtime.getRuntime().exec(commandToLunchSimulator);
 		return p.info().toString();
     }
