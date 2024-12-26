@@ -36,7 +36,6 @@ public class DevAuthenticatorUserInterface {
         customerProperties.customers()
                 .stream().map(this::createUserLoginCard)
                 .forEach(userAccountsPanel::add);
-
         mainPanel.add(userAccountsPanel);
 
         frame.getContentPane().add(mainPanel);
