@@ -5,8 +5,6 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
-#  paths:
-#    - '*/**'
 
 permissions:
   contents: read
@@ -18,12 +16,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-#    - name: purge-cache
-#      uses: MyAlbum/purge-cache@v1
-#      with:
-#        token: '${{ secrets.GITHUB_TOKEN }}'
-#        debug: true
-
     - name: Set up JDK
       uses: actions/setup-java@v4
       with:
@@ -31,15 +23,4 @@ jobs:
         distribution: 'corretto'
 
     - name: Build nordnet-dev-authenticator
-#      working-directory: .
-      run: ./gradlew bootJar
-
-    - name: Upload dev-authenticator.jar to release
-      uses: svenstaro/upload-release-action@v2
-      with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: build/libs/dev-authenticator.jar
-        asset_name: dev-authenticator.jar
-        tag: ${{ github.ref }}
-        overwrite: true
-        body: "Nordnet Dev Authenticator"
+      run: ./gradlew clean build
