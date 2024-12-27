@@ -19,7 +19,6 @@ import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -27,7 +26,6 @@ import java.awt.GridLayout;
 import java.awt.Image;
 import java.net.URI;
 import java.util.List;
-import java.util.Objects;
 
 @Slf4j
 @Component
@@ -56,21 +54,13 @@ public class DevAuthenticatorUserInterface {
 
     private JPanel createHeader() {
         JPanel header = new JPanel();
-        header.setLayout(new GridLayout(2, 1, 1, 1));
+        header.setLayout(new GridLayout(2, 2, 1, 1));
         header.setAlignmentX(0.5f);
         header.setBorder(BorderFactory.createEtchedBorder());
-
-        ImageIcon logoIcon = new ImageIcon(getClass().getResource("/nordnet-logo.png"));
-        Image image = logoIcon.getImage();
-        Image scaledImage = image.getScaledInstance(logoIcon.getIconWidth() / 3, logoIcon.getIconHeight() / 3, Image.SCALE_SMOOTH);
-        logoIcon = new ImageIcon(scaledImage);
-        JLabel logoLabel = new JLabel(logoIcon);
-        logoLabel.setAlignmentX(0f);
-
-        logoLabel.setSize(30, 30);
-        header.add(logoLabel);
-
+        header.add(new NordnetLogoPanel());
+        header.add(new IosEmulatorCheckPanel());
         header.add(createSearchBar());
+
         return header;
     }
 
@@ -125,21 +115,17 @@ public class DevAuthenticatorUserInterface {
         row.add(label);
 
         JButton iosButton = createStyledButton("IOS Emulator");
-        iosButton.setBounds(220, 10, 200, 40); // Set bounds for the button
+        iosButton.setBounds(220, 10, 200, 40);
         iosButton.addActionListener(e -> openBrowserForLoginOnIosEmulator(customer));
         row.add(iosButton);
 
-        JButton androidButton = createStyledButton("Android Simulator: TODO");
-        androidButton.setBounds(430, 10, 200, 40); // Set bounds for the button
-        row.add(androidButton);
-
         JButton webAppNextTestButton = createStyledButton("Webapp next test");
-        webAppNextTestButton.setBounds(640, 10, 200, 40); // Set bounds for the button
+        webAppNextTestButton.setBounds(440, 10, 200, 40);
         webAppNextTestButton.addActionListener(e -> openBrowserForLoginOnWebAppNextTestEnv(customer));
         row.add(webAppNextTestButton);
 
         JButton webappNextLocalButton = createStyledButton("Webapp next local");
-        webappNextLocalButton.setBounds(850, 10, 200, 40); // Set bounds for the button
+        webappNextLocalButton.setBounds(650, 10, 200, 40);
         webappNextLocalButton.addActionListener(e -> openBrowserForLoginOnWebAppNextLocal(customer));
         row.add(webappNextLocalButton);
 
