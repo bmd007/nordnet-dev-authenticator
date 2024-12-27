@@ -32,7 +32,8 @@ public class IosEmulatorCheckPanel extends JPanel {
         JLabel nordnetAppInstalledLabel = new JLabel("Nordnet app installed: %s".formatted(emulatorIdExists.isPresent() && isNordnetAppInstalled(emulatorIdExists.get()) ? GREEN_TICK : RED_CROSS));
         add(nordnetAppInstalledLabel);
 
-        JButton checkAgainButton = new JButton("Check Again. TODO make it work");
+        JButton checkAgainButton = new JButton("Check Again");
+        checkAgainButton.setForeground(java.awt.Color.BLUE);
         checkAgainButton.addActionListener(e -> updatePanel());
         add(checkAgainButton);
 

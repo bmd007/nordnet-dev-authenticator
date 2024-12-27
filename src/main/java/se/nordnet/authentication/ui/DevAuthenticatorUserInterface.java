@@ -1,93 +1,229 @@
 package se.nordnet.authentication.ui;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 import se.nordnet.authentication.domain.Customer;
 import se.nordnet.authentication.property.CustomerProperties;
 
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
+import javax.swing.UIManager;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.GridLayout;
-import java.awt.Image;
 import java.net.URI;
 import java.util.List;
 
 @Slf4j
 @Component
 public class DevAuthenticatorUserInterface {
+    // Custom colors
+    private static final Color NORDNET_BLUE = new Color(0, 91, 169);
+    private static final Color BACKGROUND_COLOR = new Color(245, 247, 250);
+    private static final Color CARD_BACKGROUND = Color.WHITE;
+    private static final Color TEXT_COLOR = new Color(51, 51, 51);
+    private static final Color BUTTON_HOVER = new Color(0, 71, 149);
 
     private final CustomerProperties customerProperties;
     private final JFrame frame = new JFrame("Nordnet Dev Authenticator");
     private final Desktop desktop = Desktop.getDesktop();
-    private final JPanel loginButtonsPanel = new JPanel(new GridLayout(0, 1, 15, 25));
+    private final JPanel mainPanel = new JPanel();
+    private final JPanel cardsPanel = new JPanel();
 
     public DevAuthenticatorUserInterface(CustomerProperties customerProperties) {
         this.customerProperties = customerProperties;
+        setupMainFrame();
     }
 
-    @EventListener(ApplicationReadyEvent.class)
-    public void start() {
-        frame.getContentPane().add(createHeader(), BorderLayout.NORTH);
-        frame.getContentPane().add(loginButtonsPanel, BorderLayout.CENTER);
-
-        renderCustomerCards(customerProperties.customers().subList(0, 3));
-
-        frame.setSize(1024, 800);
+    private void setupMainFrame() {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setMinimumSize(new Dimension(1200, 800));
+
+        // Set custom look and feel
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            customizeUIComponents();
+        } catch (Exception e) {
+            log.error("Failed to set look and feel", e);
+        }
+
+        // Setup main panel
+        mainPanel.setLayout(new BorderLayout(20, 20));
+        mainPanel.setBackground(BACKGROUND_COLOR);
+        mainPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
+
+        // Setup cards panel
+        cardsPanel.setLayout(new BoxLayout(cardsPanel, BoxLayout.Y_AXIS));
+        cardsPanel.setBackground(BACKGROUND_COLOR);
+
+        // Create and add components
+        JPanel headerPanel = createHeader();
+        JScrollPane scrollPane = new JScrollPane(cardsPanel);
+        scrollPane.setBorder(null);
+        scrollPane.getViewport().setBackground(BACKGROUND_COLOR);
+
+        mainPanel.add(headerPanel, BorderLayout.NORTH);
+        mainPanel.add(scrollPane, BorderLayout.CENTER);
+
+        // Add main panel to frame
+        frame.add(mainPanel);
+        frame.pack();
+        frame.setLocationRelativeTo(null);
         frame.setVisible(true);
+
+        // Initial render
+        renderCustomerCards(customerProperties.customers().subList(0, 3));
+    }
+
+    private void customizeUIComponents() {
+        // Customize button appearance
+        UIManager.put("Button.background", NORDNET_BLUE);
+        UIManager.put("Button.foreground", Color.WHITE);
+        UIManager.put("Button.font", new Font("Segoe UI", Font.BOLD, 14));
+        UIManager.put("Button.focus", new Color(0, 0, 0, 0));
+
+        // Customize text fields
+        UIManager.put("TextField.background", Color.WHITE);
+        UIManager.put("TextField.font", new Font("Segoe UI", Font.PLAIN, 14));
+        UIManager.put("TextField.border", BorderFactory.createCompoundBorder(
+                new LineBorder(new Color(200, 200, 200)),
+                new EmptyBorder(5, 10, 5, 10)
+        ));
     }
 
     private JPanel createHeader() {
-        JPanel header = new JPanel();
-        header.setLayout(new GridLayout(2, 2, 1, 1));
-        header.setAlignmentX(0.5f);
-        header.setBorder(BorderFactory.createEtchedBorder());
-        header.add(new NordnetLogoPanel());
-        header.add(new IosEmulatorCheckPanel());
-        header.add(createSearchBar());
+        JPanel header = new JPanel(new BorderLayout(20, 20));
+        header.setBackground(CARD_BACKGROUND);
+        header.setBorder(new CompoundBorder(
+                new LineBorder(new Color(230, 230, 230)),
+                new EmptyBorder(20, 20, 20, 20)
+        ));
+
+        // Logo panel with proper scaling
+        NordnetLogoPanel logoPanel = new NordnetLogoPanel();
+        logoPanel.setBackground(CARD_BACKGROUND);
+
+        // Status panel with modern styling
+        IosEmulatorCheckPanel statusPanel = new IosEmulatorCheckPanel();
+        statusPanel.setBackground(CARD_BACKGROUND);
+
+        // Search panel with improved styling
+        JPanel searchPanel = createSearchPanel();
+
+        // Layout components
+        JPanel topSection = new JPanel(new BorderLayout(20, 0));
+        topSection.setBackground(CARD_BACKGROUND);
+        topSection.add(logoPanel, BorderLayout.WEST);
+        topSection.add(statusPanel, BorderLayout.EAST);
+
+        header.add(topSection, BorderLayout.NORTH);
+        header.add(searchPanel, BorderLayout.SOUTH);
 
         return header;
     }
 
-    private JPanel createSearchBar() {
-        JPanel searchBar = new JPanel();
-        searchBar.setLayout(new BoxLayout(searchBar, BoxLayout.X_AXIS));
-        JTextField searchField = new JTextField();
-        searchField.setMaximumSize(new Dimension(200, 30));
-        searchField.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                filterCustomers(searchField.getText());
+    private JPanel createSearchPanel() {
+        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        searchPanel.setBackground(CARD_BACKGROUND);
+
+        JTextField searchField = new JTextField(20);
+        searchField.setPreferredSize(new Dimension(300, 35));
+        searchField.putClientProperty("JTextField.placeholderText", "Search customers...");
+
+        // Use a Unicode search icon instead of an image resource
+        JLabel searchIcon = new JLabel("\uD83D\uDD0D");
+        searchIcon.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        searchIcon.setForeground(new Color(128, 128, 128));
+
+        searchPanel.add(searchIcon);
+        searchPanel.add(searchField);
+
+        // Add search functionality
+        searchField.getDocument().addDocumentListener(new SearchDocumentListener(this::filterCustomers));
+
+        return searchPanel;
+    }
+
+    private JPanel createCustomerCard(Customer customer) {
+        JPanel card = new JPanel();
+        card.setLayout(new BorderLayout(10, 10));
+        card.setBackground(CARD_BACKGROUND);
+        card.setBorder(new CompoundBorder(
+                new LineBorder(new Color(230, 230, 230)),
+                new EmptyBorder(15, 15, 15, 15)
+        ));
+        card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100));
+
+        // Customer info section
+        JPanel infoPanel = new JPanel(new BorderLayout());
+        infoPanel.setBackground(CARD_BACKGROUND);
+
+        JLabel nameLabel = new JLabel(customer.name());
+        nameLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        nameLabel.setForeground(TEXT_COLOR);
+
+        JLabel countryLabel = new JLabel(customer.country());
+        countryLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        countryLabel.setForeground(new Color(128, 128, 128));
+
+        JLabel customerIdLabel = new JLabel(customer.id());
+        customerIdLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        customerIdLabel.setForeground(new Color(128, 128, 128));
+
+        infoPanel.add(nameLabel, BorderLayout.NORTH);
+        infoPanel.add(countryLabel, BorderLayout.CENTER);
+        infoPanel.add(customerIdLabel, BorderLayout.SOUTH);
+
+        // Buttons panel
+        JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        buttonsPanel.setBackground(CARD_BACKGROUND);
+
+        addStyledButton(buttonsPanel, "IOS Emulator", e -> openBrowserForLoginOnIosEmulator(customer));
+        addStyledButton(buttonsPanel, "Webapp next test", e -> openBrowserForLoginOnWebAppNextTestEnv(customer));
+        addStyledButton(buttonsPanel, "Webapp next local", e -> openBrowserForLoginOnWebAppNextLocal(customer));
+        addStyledButton(buttonsPanel, "Android simulator", e -> {});
+
+        card.add(infoPanel, BorderLayout.WEST);
+        card.add(buttonsPanel, BorderLayout.CENTER);
+
+        return card;
+    }
+
+    private void addStyledButton(JPanel panel, String text, java.awt.event.ActionListener listener) {
+        JButton button = new JButton(text);
+        button.setPreferredSize(new Dimension(170, 35));
+        button.setBorderPainted(true);
+        button.setBorder(new LineBorder(NORDNET_BLUE, 5));
+        button.setBackground(NORDNET_BLUE);
+        button.setForeground(Color.BLACK);
+        button.addActionListener(listener);
+
+        // Add hover effect
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                button.setBackground(BUTTON_HOVER);
             }
 
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                filterCustomers(searchField.getText());
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                filterCustomers(searchField.getText());
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                button.setBackground(NORDNET_BLUE);
             }
         });
-        searchBar.add(new JLabel("Search: "));
-        searchBar.add(searchField);
-        return searchBar;
+
+        panel.add(button);
     }
 
     private void filterCustomers(String query) {
@@ -100,54 +236,15 @@ public class DevAuthenticatorUserInterface {
     }
 
     private void renderCustomerCards(List<Customer> customers) {
-        loginButtonsPanel.removeAll();
-        customers.stream().map(this::createLoginCard).forEach(loginButtonsPanel::add);
-        loginButtonsPanel.revalidate();
-        loginButtonsPanel.repaint();
+        cardsPanel.removeAll();
+        customers.forEach(customer -> {
+            cardsPanel.add(createCustomerCard(customer));
+            cardsPanel.add(Box.createRigidArea(new Dimension(0, 10))); // Add spacing between cards
+        });
+        cardsPanel.revalidate();
+        cardsPanel.repaint();
     }
 
-    private JPanel createLoginCard(Customer customer) {
-        JPanel row = new JPanel(null); // Set layout to null
-        row.setPreferredSize(new Dimension(1024, 60)); // Set preferred size for the row
-
-        JLabel label = createStyledLabel(customer.name() + " in " + customer.country());
-        label.setBounds(10, 10, 200, 40); // Set bounds for the label
-        row.add(label);
-
-        JButton iosButton = createStyledButton("IOS Emulator");
-        iosButton.setBounds(220, 10, 200, 40);
-        iosButton.addActionListener(e -> openBrowserForLoginOnIosEmulator(customer));
-        row.add(iosButton);
-
-        JButton webAppNextTestButton = createStyledButton("Webapp next test");
-        webAppNextTestButton.setBounds(440, 10, 200, 40);
-        webAppNextTestButton.addActionListener(e -> openBrowserForLoginOnWebAppNextTestEnv(customer));
-        row.add(webAppNextTestButton);
-
-        JButton webappNextLocalButton = createStyledButton("Webapp next local");
-        webappNextLocalButton.setBounds(650, 10, 200, 40);
-        webappNextLocalButton.addActionListener(e -> openBrowserForLoginOnWebAppNextLocal(customer));
-        row.add(webappNextLocalButton);
-
-        return row;
-    }
-
-    private JLabel createStyledLabel(String text) {
-        JLabel label = new JLabel(text);
-        Font arial = new Font("Arial", Font.BOLD, 13);
-        label.setFont(arial);
-        return label;
-    }
-
-    private JButton createStyledButton(String text) {
-        JButton button = new JButton(text);
-        button.setFont(new Font("Arial", Font.BOLD, 13));
-        Dimension buttonSize = new Dimension(200, 50); // Set your desired fixed size
-        button.setPreferredSize(buttonSize);
-        button.setMinimumSize(buttonSize);
-        button.setMaximumSize(buttonSize);
-        return button;
-    }
 
     private void openBrowserForLoginOnIosEmulator(Customer customer) {
         URI authorizationUri = getAuthorizationUrl(customer.getBase64Id(), "http://localhost:9070", customer.country());
@@ -181,5 +278,37 @@ public class DevAuthenticatorUserInterface {
                 .queryParam("scope", "api://fe88cb91-1d7f-4d8e-a4e7-b2287bce567b/Read openid")
                 .queryParam("state", state)
                 .build().toUri();
+    }
+}
+
+class SearchDocumentListener implements javax.swing.event.DocumentListener {
+    private final java.util.function.Consumer<String> searchCallback;
+
+    public SearchDocumentListener(java.util.function.Consumer<String> searchCallback) {
+        this.searchCallback = searchCallback;
+    }
+
+    @Override
+    public void insertUpdate(javax.swing.event.DocumentEvent e) {
+        triggerSearch(e);
+    }
+
+    @Override
+    public void removeUpdate(javax.swing.event.DocumentEvent e) {
+        triggerSearch(e);
+    }
+
+    @Override
+    public void changedUpdate(javax.swing.event.DocumentEvent e) {
+        triggerSearch(e);
+    }
+
+    private void triggerSearch(javax.swing.event.DocumentEvent e) {
+        try {
+            String text = e.getDocument().getText(0, e.getDocument().getLength());
+            searchCallback.accept(text);
+        } catch (javax.swing.text.BadLocationException ex) {
+            ex.printStackTrace();
+        }
     }
 }
