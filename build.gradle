@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'se.nordnet.authentication'
-version = '0.0.1-SNAPSHOT'
+version = ''
 
 java {
 	toolchain {
