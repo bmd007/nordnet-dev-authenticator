@@ -32,7 +32,7 @@ jobs:
 
     - name: Build nordnet-dev-authenticator
 #      working-directory: .
-      run: ./gradlew clean build bootJar
+      run: ./gradlew bootJar
 
     - name: Upload dev-authenticator.jar to release
       uses: svenstaro/upload-release-action@v2
