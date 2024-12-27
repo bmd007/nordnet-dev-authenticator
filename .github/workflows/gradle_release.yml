@@ -35,7 +35,7 @@ jobs:
           Changes in this Release
           - First Change
           - Second Change
-        draft: true
+        draft: false
         prerelease: false
 
     - name: Upload release asset
@@ -45,8 +45,8 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./build/libs/dev-authenticator.jar
-        asset_name: asset.zip
-        asset_content_type: application/zip
+        asset_name: dev-authenticator.jar
+        asset_content_type: application/jar
 
     - name: Publish release
       uses: StuYarrow/publish-release@v1.1.2
