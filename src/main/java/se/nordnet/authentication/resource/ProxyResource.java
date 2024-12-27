@@ -4,8 +4,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.IOException;
-
 import static se.nordnet.authentication.IosEmulatorHelper.emulatorWithNordnetAppInstalled;
 import static se.nordnet.authentication.IosEmulatorHelper.executeCommand;
 
@@ -21,8 +19,8 @@ public class ProxyResource {
     @GetMapping(produces = "text/html")
     public String openSimulatorWithAuthzCode(@RequestParam String code, @RequestParam String state) {
         String udid = emulatorWithNordnetAppInstalled().udid();
-        executeCommand(TERMINATE_NORDNET_IOS_APP_COMMAND_TEMPLATE.formatted("booted"));
-        executeCommand(LUNCH_IOS_APP_COMMAND_TEMPLATE.formatted("booted", code, state));
+        executeCommand(TERMINATE_NORDNET_IOS_APP_COMMAND_TEMPLATE.formatted(udid));
+        executeCommand(LUNCH_IOS_APP_COMMAND_TEMPLATE.formatted(udid, code, state));
         return """
                 <html>
                 <head>
