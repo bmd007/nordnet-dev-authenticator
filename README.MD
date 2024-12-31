@@ -18,10 +18,6 @@ Use this application to easily login to test environments at Nordnet.
         * The name field is just a way to call each customer (id). They are not referencing to anything like username or ... .
 
 ### How to run the application (on MacOS and Linux)
-#### First use:
-    - Run the script called `desktop-icon.sh` to create a desktop icon for the script that runs the application!
-    - Run the application by clicking the icon on the desktop
-
-#### Subsequent uses:
-    - Run the application by clicking the icon on the desktop
+    - Run `./gradlew bootRun` to start the application
+    - (TODO: fixme) Run the script called `desktop-icon.sh` to create a desktop icon for the script that runs the application!
     - `git pull` every now and again to get the latest features and customer(ids)
