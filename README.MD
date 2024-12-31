@@ -17,6 +17,7 @@ Use this application to easily login to test environments at Nordnet.
         * (Recommended) Create a PR for the new users you add to the list, so that other developers can use them too. 
         * The name field is just a way to call each customer (id). They are not referencing to anything like username or ... .
 
+### How to run the application (on MacOS and Linux)
 #### First use:
     - Run the script called `desktop-icon.sh` to create a desktop icon for the script that runs the application!
     - Run the application by clicking the icon on the desktop
