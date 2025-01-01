@@ -1,20 +1,19 @@
 #!/bin/bash
 
-echo "Creating desktop shortcut from $(pwd)."
-
 SHORTCUT_NAME="Nordnet-dev-authenticator"
 SHORTCUT_PATH="$HOME/Desktop/$SHORTCUT_NAME.command"
-SHORTCUT_PATH="$(pwd)/$SHORTCUT_NAME.command"
-ICON_PATH="$(pwd)/src/main/resources/img.png"
-RUN_SCRIPT="sh $(pwd)/gradlew bootRun"
+PROJECT_PATH="$(pwd)"
 
+echo "Creating desktop shortcut from $PROJECT_PATH."
 
 cat <<EOF > "$SHORTCUT_PATH"
 #!/bin/bash
-$RUN_SCRIPT
+pwd
+cd "$PROJECT_PATH"
+pwd
+./gradlew bootRun
 EOF
 
 chmod a+x "$SHORTCUT_PATH"
-chmod 755 "$SHORTCUT_PATH"
 
 echo "Shortcut created in $SHORTCUT_PATH."

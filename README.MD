@@ -19,5 +19,15 @@ Use this application to easily login to test environments at Nordnet.
 
 ### How to run the application (on MacOS and Linux)
     - Run `./gradlew bootRun` to start the application
-    - (TODO: fixme) Run the script called `desktop-icon.sh` to create a desktop icon for the script that runs the application!
     - `git pull` every now and again to get the latest features and customer(ids)
+
+### Desktop shortcut:
+    - `cd` to the project/repository root (important)
+    - Run `./desktop-shortcut.sh`
+
+## TODO
+    - App Icon
+    - Desktop shortcut with a real icon
+    - Add support for Android simulator
+    - Add support for partner web
+    - Automatically build the latest version of the app in github and send releases to company portal!
