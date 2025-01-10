@@ -72,8 +72,9 @@ public class ProxyResource {
     }
 
     private static void waitForNordnetAppTermination(IosSimulator targetIosSimulator) {
-        while (!IosSimulatorHelper.isNordeAppRunning(targetIosSimulator)) {
+        while (IosSimulatorHelper.isNordeAppRunning(targetIosSimulator)) {
             try {
+                log.info("Waiting for Nordnet app to terminate on iOS simulator {}", targetIosSimulator);
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
                 log.error("Error waiting for Nordnet app to terminate", e);
