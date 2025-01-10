@@ -28,13 +28,13 @@ public class IosSimulatorHelper {
 
     public static List<IosSimulator> getRunningIosSimulators() {
         try {
-            return objectsMapper.readValue(executeCommand(GET_BOOTED_SIMULATORS_COMMAND), new TypeReference<List<IosSimulator>>() {});
+            return objectsMapper.readValue(executeCommand(GET_BOOTED_SIMULATORS_COMMAND), new TypeReference<List<IosSimulator>>() {
+            });
         } catch (Exception e) {
             log.error("Error getting running iOS simulators", e);
             return List.of();
         }
     }
-
 
     public static boolean isNordnetAppInstalled(String simulatorId) {
         if (simulatorId == null) {
@@ -43,13 +43,20 @@ public class IosSimulatorHelper {
         return executeCommand("xcrun simctl listapps " + simulatorId).contains("com.nordnet.Nordnet");
     }
 
-    public static IosSimulator simulatorWithNordnetAppInstalled(){
+    public static IosSimulator simulatorWithNordnetAppInstalled() {
         return getRunningIosSimulators()
-                .stream().filter(simulator -> isNordnetAppInstalled(simulator.udid()))
+                .stream()
+                .filter(simulator -> isNordnetAppInstalled(simulator.udid()))
                 .findFirst()
                 .orElseThrow();
     }
 
+    public static List<IosSimulator> simulatorsWithNordnetAppInstalled() {
+        return getRunningIosSimulators()
+                .stream()
+                .filter(simulator -> isNordnetAppInstalled(simulator.udid()))
+                .toList();
+    }
 
     public static String executeCommand(String userCommand) {
         List<String> command = List.of("sh", "-c", userCommand);
@@ -66,12 +73,11 @@ public class IosSimulatorHelper {
             }
             int exitCode = process.waitFor();
             if (exitCode != 0) {
-                throw new RuntimeException("Command execution failed with exit code: " + exitCode);
+                throw new RuntimeException("Command %s execution failed with exit code: %s".formatted(command, exitCode));
             }
         } catch (Exception e) {
-            throw new RuntimeException("Error executing command", e);
+            throw new RuntimeException("Error executing command %s".formatted(command), e);
         }
-
         return output.toString();
     }
 }

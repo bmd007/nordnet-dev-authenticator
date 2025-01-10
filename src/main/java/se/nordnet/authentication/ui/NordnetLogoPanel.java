@@ -7,7 +7,6 @@ import java.awt.Image;
 import java.util.Objects;
 
 public class NordnetLogoPanel extends JPanel {
-
     public NordnetLogoPanel() {
         super();
         ImageIcon logoIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/nordnet-logo.png")));

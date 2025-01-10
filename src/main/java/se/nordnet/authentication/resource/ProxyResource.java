@@ -1,26 +1,46 @@
 package se.nordnet.authentication.resource;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import se.nordnet.authentication.IosSimulatorHelper;
+import se.nordnet.authentication.type.OidcState;
 
-import static se.nordnet.authentication.IosSimulatorHelper.simulatorWithNordnetAppInstalled;
+import java.util.List;
+import java.util.Optional;
+
 import static se.nordnet.authentication.IosSimulatorHelper.executeCommand;
+import static se.nordnet.authentication.IosSimulatorHelper.simulatorsWithNordnetAppInstalled;
 
+@Slf4j
 @RestController
 public class ProxyResource {
 
-    private static final String LUNCH_IOS_APP_COMMAND_TEMPLATE = """
-            xcrun simctl launch %s com.nordnet.Nordnet -entraIdAuthzCode "%s" -countryCode "%s"
-            """.stripIndent();
-    public static final String TERMINATE_NORDNET_IOS_APP_COMMAND_TEMPLATE = "xcrun simctl terminate %s com.nordnet.Nordnet";
-
-    //TODO support Android: multiplex on path or state!
+    // TODO support Android
     @GetMapping(produces = "text/html")
     public String openSimulatorWithAuthzCode(@RequestParam String code, @RequestParam String state) {
-        String udid = simulatorWithNordnetAppInstalled().udid();
-        executeCommand(TERMINATE_NORDNET_IOS_APP_COMMAND_TEMPLATE.formatted(udid));
-        executeCommand(LUNCH_IOS_APP_COMMAND_TEMPLATE.formatted(udid, code, state));
+        OidcState oidcState = OidcState.fromBase64Json(state);
+
+        List<String> iosSimulatorWithNordetApp = simulatorsWithNordnetAppInstalled()
+                .stream()
+                .map(IosSimulatorHelper.IosSimulator::udid)
+                .toList();
+        if (iosSimulatorWithNordetApp.isEmpty()) {
+            throw new IllegalStateException("No iOS simulator with Nordnet app installed found");
+        }
+        String targetIosSimulatorId = Optional.ofNullable(oidcState)
+                .map(OidcState::targetIosSimulatorId)
+                .filter(iosSimulatorWithNordetApp::contains)
+                .orElseGet(() -> iosSimulatorWithNordetApp.get(0));
+
+        try {
+            terminateNordnetAppOnIosSimulator(targetIosSimulatorId);
+        } catch (Exception e) {
+            log.error("Error terminating Nordnet app", e);
+        }
+        lunchNordnetApp(code, state, targetIosSimulatorId);
+
         return """
                 <html>
                 <head>
@@ -51,5 +71,15 @@ public class ProxyResource {
                 </body>
                 </html>
                 """;
+    }
+
+    private static void lunchNordnetApp(String code, String state, String udid) {
+        executeCommand("""
+                xcrun simctl launch %s com.nordnet.Nordnet -entraIdAuthzCode "%s" -countryCode "%s"
+                """.stripIndent().formatted(udid, code, state));
+    }
+
+    private static void terminateNordnetAppOnIosSimulator(String iosSimulatorId) {
+        executeCommand("xcrun simctl terminate %s com.nordnet.Nordnet".formatted(iosSimulatorId));
     }
 }

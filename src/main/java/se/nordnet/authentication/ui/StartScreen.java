@@ -1,10 +1,12 @@
 package se.nordnet.authentication.ui;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
-import se.nordnet.authentication.domain.Customer;
+import se.nordnet.authentication.type.Customer;
 import se.nordnet.authentication.property.CustomerProperties;
+import se.nordnet.authentication.type.OidcState;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -30,7 +32,7 @@ import java.util.List;
 
 @Slf4j
 @Component
-public class DevAuthenticatorUserInterface {
+public class StartScreen {
     // Custom colors
     private static final Color NORDNET_BLUE = new Color(0, 91, 169);
     private static final Color BACKGROUND_COLOR = new Color(245, 247, 250);
@@ -39,13 +41,16 @@ public class DevAuthenticatorUserInterface {
     private static final Color BUTTON_HOVER = new Color(0, 71, 149);
 
     private final CustomerProperties customerProperties;
+    private final ObjectMapper objectMapper;
+
     private final JFrame frame = new JFrame("Nordnet Dev Authenticator");
     private final Desktop desktop = Desktop.getDesktop();
     private final JPanel mainPanel = new JPanel();
     private final JPanel cardsPanel = new JPanel();
 
-    public DevAuthenticatorUserInterface(CustomerProperties customerProperties) {
+    public StartScreen(CustomerProperties customerProperties, ObjectMapper objectMapper) {
         this.customerProperties = customerProperties;
+        this.objectMapper = objectMapper;
         setupMainFrame();
     }
 
@@ -192,10 +197,11 @@ public class DevAuthenticatorUserInterface {
         JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         buttonsPanel.setBackground(CARD_BACKGROUND);
 
-        addStyledButton(buttonsPanel, "IOS Simulator", e -> openBrowserForLoginOnIosSimulator(customer));
+        addStyledButton(buttonsPanel, "IOS Simulator", e -> openBrowserForLoginOnIosSimulator(customer, "targetIosSimulatorId"));
         addStyledButton(buttonsPanel, "Webapp next test", e -> openBrowserForLoginOnWebAppNextTestEnv(customer));
         addStyledButton(buttonsPanel, "Webapp next local", e -> openBrowserForLoginOnWebAppNextLocal(customer));
-        addStyledButton(buttonsPanel, "Android emulator", e -> {});
+        addStyledButton(buttonsPanel, "Android emulator", e -> {
+        });
 
         card.add(infoPanel, BorderLayout.WEST);
         card.add(buttonsPanel, BorderLayout.CENTER);
@@ -246,8 +252,9 @@ public class DevAuthenticatorUserInterface {
     }
 
 
-    private void openBrowserForLoginOnIosSimulator(Customer customer) {
-        URI authorizationUri = getAuthorizationUrl(customer.getBase64Id(), "http://localhost:9070", customer.country());
+    private void openBrowserForLoginOnIosSimulator(Customer customer, String targetIosSimulatorId) {
+        String state = generateOidcState(customer.country(), targetIosSimulatorId);
+        URI authorizationUri = getAuthorizationUrl(customer.getBase64Id(), "http://localhost:9070", state);
         openBrowser(authorizationUri);
     }
 
@@ -269,6 +276,10 @@ public class DevAuthenticatorUserInterface {
         }
     }
 
+    private String generateOidcState(String country, String targetIosSimulatorId) {
+        return new OidcState(country, targetIosSimulatorId).getBase64Json();
+    }
+
     private URI getAuthorizationUrl(String nonce, String redirectUri, String state) {
         return UriComponentsBuilder.fromUriString("https://login.microsoftonline.com/eae4202d-7ff0-44f1-b130-3afd5da7b347/oauth2/v2.0/authorize")
                 .queryParam("redirect_uri", redirectUri)
@@ -279,36 +290,36 @@ public class DevAuthenticatorUserInterface {
                 .queryParam("state", state)
                 .build().toUri();
     }
-}
 
-class SearchDocumentListener implements javax.swing.event.DocumentListener {
-    private final java.util.function.Consumer<String> searchCallback;
+    class SearchDocumentListener implements javax.swing.event.DocumentListener {
+        private final java.util.function.Consumer<String> searchCallback;
 
-    public SearchDocumentListener(java.util.function.Consumer<String> searchCallback) {
-        this.searchCallback = searchCallback;
-    }
+        public SearchDocumentListener(java.util.function.Consumer<String> searchCallback) {
+            this.searchCallback = searchCallback;
+        }
 
-    @Override
-    public void insertUpdate(javax.swing.event.DocumentEvent e) {
-        triggerSearch(e);
-    }
+        @Override
+        public void insertUpdate(javax.swing.event.DocumentEvent e) {
+            triggerSearch(e);
+        }
 
-    @Override
-    public void removeUpdate(javax.swing.event.DocumentEvent e) {
-        triggerSearch(e);
-    }
+        @Override
+        public void removeUpdate(javax.swing.event.DocumentEvent e) {
+            triggerSearch(e);
+        }
 
-    @Override
-    public void changedUpdate(javax.swing.event.DocumentEvent e) {
-        triggerSearch(e);
-    }
+        @Override
+        public void changedUpdate(javax.swing.event.DocumentEvent e) {
+            triggerSearch(e);
+        }
 
-    private void triggerSearch(javax.swing.event.DocumentEvent e) {
-        try {
-            String text = e.getDocument().getText(0, e.getDocument().getLength());
-            searchCallback.accept(text);
-        } catch (javax.swing.text.BadLocationException ex) {
-            ex.printStackTrace();
+        private void triggerSearch(javax.swing.event.DocumentEvent e) {
+            try {
+                String text = e.getDocument().getText(0, e.getDocument().getLength());
+                searchCallback.accept(text);
+            } catch (javax.swing.text.BadLocationException ex) {
+                ex.printStackTrace();
+            }
         }
     }
 }
