@@ -57,7 +57,11 @@ public class IosSimulatorHelper {
     }
 
     public static void terminateNordnetApp(IosSimulator iosSimulator) {
-        executeCommand("xcrun simctl terminate %s com.nordnet.Nordnet".formatted(iosSimulator.udid()));
+        try {
+            executeCommand("xcrun simctl terminate %s com.nordnet.Nordnet".formatted(iosSimulator.udid()));
+        } catch (Exception e) {
+            log.debug("Error terminating Nordnet app on iOS simulator {}", iosSimulator, e);
+        }
     }
 
     public static void lunchNordnetApp(String code, String country, IosSimulator iosSimulator) {
