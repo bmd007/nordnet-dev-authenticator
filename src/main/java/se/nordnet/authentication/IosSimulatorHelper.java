@@ -11,7 +11,7 @@ import java.util.List;
 @Slf4j
 public class IosSimulatorHelper {
 
-    public static final String GET_BOOTED_SIMULATORS_COMMAND = "xcrun simctl list devices booted --json | jq '.devices | to_entries | map(select(.value | length > 0) | .value[] | {udid, name})'".strip();
+    public static final String GET_BOOTED_IOS_SIMULATORS_COMMAND = "xcrun simctl list devices booted --json | jq '.devices | to_entries | map(select(.value | length > 0) | .value[] | {udid, name})'".strip();
 
     public record IosSimulator(String udid, String name) {
         public IosSimulator {
@@ -28,8 +28,7 @@ public class IosSimulatorHelper {
 
     public static List<IosSimulator> getRunningIosSimulators() {
         try {
-            return objectsMapper.readValue(executeCommand(GET_BOOTED_SIMULATORS_COMMAND), new TypeReference<List<IosSimulator>>() {
-            });
+            return objectsMapper.readValue(executeCommand(GET_BOOTED_IOS_SIMULATORS_COMMAND), new TypeReference<>() {});
         } catch (Exception e) {
             log.error("Error getting running iOS simulators", e);
             return List.of();
