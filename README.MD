@@ -9,7 +9,6 @@ Use this application to easily login to test environments at Nordnet.
 ### Requirements for running
  - Java 17 and higher
  - jq (brew install jq)
- - 
 
 ### List of test users:
   List of customer (ids) that can be used for login exists as [properties](src/main/resources/application.yml) to this application.
