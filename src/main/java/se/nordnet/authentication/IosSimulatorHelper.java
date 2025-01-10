@@ -45,14 +45,14 @@ public class IosSimulatorHelper {
     public static boolean isNordeAppRunning(@NotNull IosSimulator iosSimulator) {
         String simulatorId = iosSimulator.udid();
         if (simulatorId == null) {
-            return false;
+            throw new IllegalArgumentException("IOS Simulator ID must not be null");
         }
         try {
             return executeCommand("xcrun simctl spawn " + simulatorId + " launchctl list")
                     .contains("com.nordnet.Nordnet");
         } catch (Exception e) {
             log.error("Error checking if Nordnet app is running on iOS simulator {}", iosSimulator, e);
-            return false;
+            throw new IllegalStateException("Error checking if Nordnet app is running on iOS simulator", e);
         }
     }
 
@@ -60,7 +60,7 @@ public class IosSimulatorHelper {
         try {
             executeCommand("xcrun simctl terminate %s com.nordnet.Nordnet".formatted(iosSimulator.udid()));
         } catch (Exception e) {
-            log.debug("Error terminating Nordnet app on iOS simulator {}", iosSimulator, e);
+            log.error("Error terminating Nordnet app on iOS simulator {}", iosSimulator, e);
         }
     }
 

@@ -7,12 +7,12 @@ import java.util.Base64;
 import java.util.Set;
 
 public record Customer(@NotBlank String name, @NotBlank String id, @NotBlank String country) {
-    private static final Set<String> COUNTRY_CODES = Set.of("SE", "NO", "FI", "DK");
+    private static final Set<String> COUNTRY_CODES = Set.of("se", "no", "fi", "dk");
     public Customer {
-        if (COUNTRY_CODES.stream().noneMatch(country::equalsIgnoreCase)) {
+        country = country.toLowerCase();
+        if (COUNTRY_CODES.contains(country)) {
             throw new IllegalArgumentException("CountryCode must be one of " + COUNTRY_CODES);
         }
-        country = country.toUpperCase();
     }
 
     @JsonIgnore
