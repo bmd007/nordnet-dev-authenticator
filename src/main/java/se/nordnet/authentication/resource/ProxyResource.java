@@ -17,6 +17,37 @@ import static se.nordnet.authentication.IosSimulatorHelper.iosSimulatorsWithNord
 @RestController
 public class ProxyResource {
 
+    public static final String CLOSE_TAB_HTML = """
+            <html>
+            <head>
+                <title>IOS Simulator</title>
+                <style>
+                    body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+                    .message { font-size: 20px; margin-top: 20px; }
+                </style>
+                <script>
+                    let countdown = 5;
+                    function updateTimer() {
+                        document.getElementById('timer').innerText = countdown;
+                        if (countdown > 0) {
+                            countdown--;
+                            setTimeout(updateTimer, 1000);
+                        } else {
+                            window.close();
+                        }
+                    }
+                    window.onload = function() {
+                        updateTimer();
+                    };
+                </script>
+            </head>
+            <body>
+                <h1>Check your running/booted iOS simulator</h1>
+                <p class="message">This window/tab will be closed automatically in <span id="timer">5</span> seconds.</p>
+            </body>
+            </html>
+            """;
+
     // TODO support Android
     @GetMapping(produces = "text/html")
     public String openSimulatorWithAuthzCode(@RequestParam String code, @RequestParam String state) {
@@ -48,36 +79,7 @@ public class ProxyResource {
         }
         lunchNordnetApp(code, oidcState.country(), targetIosSimulatorId);
 
-        return """
-                <html>
-                <head>
-                    <title>IOS Simulator</title>
-                    <style>
-                        body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
-                        .message { font-size: 20px; margin-top: 20px; }
-                    </style>
-                    <script>
-                        let countdown = 5;
-                        function updateTimer() {
-                            document.getElementById('timer').innerText = countdown;
-                            if (countdown > 0) {
-                                countdown--;
-                                setTimeout(updateTimer, 1000);
-                            } else {
-                                window.close();
-                            }
-                        }
-                        window.onload = function() {
-                            updateTimer();
-                        };
-                    </script>
-                </head>
-                <body>
-                    <h1>Check your running/booted iOS simulator</h1>
-                    <p class="message">This window/tab will be closed automatically in <span id="timer">5</span> seconds.</p>
-                </body>
-                </html>
-                """;
+        return CLOSE_TAB_HTML;
     }
 
     private static void lunchNordnetApp(String code, String country, String udid) {
