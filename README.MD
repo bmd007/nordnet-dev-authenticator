@@ -27,7 +27,7 @@ Use this application to easily login to test environments at Nordnet.
 
 ## TODO
     - App Icon
-    - Desktop shortcut with a real icon
+    - Desktop shortcut icon
     - Add support for Android emulator
     - Add support for partner web
     - Automatically build the latest version of the app in github and send releases to company portal!
