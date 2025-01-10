@@ -42,10 +42,11 @@ public class IosSimulatorHelper {
         return executeCommand("xcrun simctl listapps " + simulatorId).contains("com.nordnet.Nordnet");
     }
 
-    public static List<IosSimulator> iosSimulatorsWithNordnetAppInstalled() {
+    public static List<String> nordnetAppContainingIosSimulatorIds() {
         return getRunningIosSimulators()
                 .stream()
                 .filter(simulator -> isNordnetAppInstalled(simulator.udid()))
+                .map(IosSimulator::udid)
                 .toList();
     }
 

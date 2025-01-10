@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static se.nordnet.authentication.IosSimulatorHelper.executeCommand;
-import static se.nordnet.authentication.IosSimulatorHelper.iosSimulatorsWithNordnetAppInstalled;
+import static se.nordnet.authentication.IosSimulatorHelper.nordnetAppContainingIosSimulatorIds;
 
 @Slf4j
 @RestController
@@ -53,33 +53,33 @@ public class ProxyResource {
     public String openSimulatorWithAuthzCode(@RequestParam String code, @RequestParam String state) {
         OidcState oidcState = OidcState.fromBase64Json(state);
 
-        List<String> iosSimulatorWithNordetApp = iosSimulatorsWithNordnetAppInstalled()
-                .stream()
-                .map(IosSimulatorHelper.IosSimulator::udid)
-                .toList();
-        if (iosSimulatorWithNordetApp.isEmpty()) {
+        List<String> iosSimulators_WithNordetApp_id = nordnetAppContainingIosSimulatorIds();
+        if (iosSimulators_WithNordetApp_id.isEmpty()) {
             throw new IllegalStateException("No iOS simulator with Nordnet app installed found");
         }
         String targetIosSimulatorId = Optional.ofNullable(oidcState)
                 .map(OidcState::targetIosSimulatorId)
-                .filter(iosSimulatorWithNordetApp::contains)
-                .orElseGet(() -> iosSimulatorWithNordetApp.get(0));
+                .filter(iosSimulators_WithNordetApp_id::contains)
+                .orElseGet(() -> iosSimulators_WithNordetApp_id.get(0));
         try {
             terminateNordnetAppOnIosSimulator(targetIosSimulatorId);
         } catch (Exception e) {
             log.error("Error terminating Nordnet app on iOS simulator", e);
         }
-        //todo wait until nordnet app is terminated
-        while (IosSimulatorHelper.isNordeAppRunning(targetIosSimulatorId)) {
+        waitForNordnetAppTermination(targetIosSimulatorId);
+        lunchNordnetApp(code, oidcState.country(), targetIosSimulatorId);
+
+        return CLOSE_TAB_HTML;
+    }
+
+    private static void waitForNordnetAppTermination(String targetIosSimulatorId) {
+        while (!IosSimulatorHelper.isNordeAppRunning(targetIosSimulatorId)) {
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
                 log.error("Error waiting for Nordnet app to terminate", e);
             }
         }
-        lunchNordnetApp(code, oidcState.country(), targetIosSimulatorId);
-
-        return CLOSE_TAB_HTML;
     }
 
     private static void lunchNordnetApp(String code, String country, String udid) {
