@@ -4,8 +4,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import static se.nordnet.authentication.IosEmulatorHelper.emulatorWithNordnetAppInstalled;
-import static se.nordnet.authentication.IosEmulatorHelper.executeCommand;
+import static se.nordnet.authentication.IosSimulatorHelper.simulatorWithNordnetAppInstalled;
+import static se.nordnet.authentication.IosSimulatorHelper.executeCommand;
 
 @RestController
 public class ProxyResource {
@@ -18,13 +18,13 @@ public class ProxyResource {
     //TODO support Android: multiplex on path or state!
     @GetMapping(produces = "text/html")
     public String openSimulatorWithAuthzCode(@RequestParam String code, @RequestParam String state) {
-        String udid = emulatorWithNordnetAppInstalled().udid();
+        String udid = simulatorWithNordnetAppInstalled().udid();
         executeCommand(TERMINATE_NORDNET_IOS_APP_COMMAND_TEMPLATE.formatted(udid));
         executeCommand(LUNCH_IOS_APP_COMMAND_TEMPLATE.formatted(udid, code, state));
         return """
                 <html>
                 <head>
-                    <title>iOS Emulator</title>
+                    <title>IOS Simulator</title>
                     <style>
                         body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
                         .message { font-size: 20px; margin-top: 20px; }
@@ -46,7 +46,7 @@ public class ProxyResource {
                     </script>
                 </head>
                 <body>
-                    <h1>Check your running/booted iOS emulator</h1>
+                    <h1>Check your running/booted iOS simulator</h1>
                     <p class="message">This window/tab will be closed automatically in <span id="timer">5</span> seconds.</p>
                 </body>
                 </html>

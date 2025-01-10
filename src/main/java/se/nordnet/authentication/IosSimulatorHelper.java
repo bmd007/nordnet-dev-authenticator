@@ -9,12 +9,12 @@ import java.io.InputStreamReader;
 import java.util.List;
 
 @Slf4j
-public class IosEmulatorHelper {
+public class IosSimulatorHelper {
 
-    public static final String GET_BOOTED_EMULATORS_COMMAND = "xcrun simctl list devices booted --json | jq '.devices | to_entries | map(select(.value | length > 0) | .value[] | {udid, name})'".strip();
+    public static final String GET_BOOTED_SIMULATORS_COMMAND = "xcrun simctl list devices booted --json | jq '.devices | to_entries | map(select(.value | length > 0) | .value[] | {udid, name})'".strip();
 
-    public record IosEmulator(String udid, String name) {
-        public IosEmulator {
+    public record IosSimulator(String udid, String name) {
+        public IosSimulator {
             if (udid == null || udid.isBlank()) {
                 throw new IllegalArgumentException("udid cannot be null or blank");
             }
@@ -26,26 +26,26 @@ public class IosEmulatorHelper {
 
     private static final ObjectMapper objectsMapper = new ObjectMapper();
 
-    public static List<IosEmulator> getRunningIosEmulators() {
+    public static List<IosSimulator> getRunningIosSimulators() {
         try {
-            return objectsMapper.readValue(executeCommand(GET_BOOTED_EMULATORS_COMMAND), new TypeReference<List<IosEmulator>>() {});
+            return objectsMapper.readValue(executeCommand(GET_BOOTED_SIMULATORS_COMMAND), new TypeReference<List<IosSimulator>>() {});
         } catch (Exception e) {
-            log.error("Error getting running iOS emulators", e);
+            log.error("Error getting running iOS simulators", e);
             return List.of();
         }
     }
 
 
-    public static boolean isNordnetAppInstalled(String emulatorId) {
-        if (emulatorId == null) {
+    public static boolean isNordnetAppInstalled(String simulatorId) {
+        if (simulatorId == null) {
             return false;
         }
-        return executeCommand("xcrun simctl listapps " + emulatorId).contains("com.nordnet.Nordnet");
+        return executeCommand("xcrun simctl listapps " + simulatorId).contains("com.nordnet.Nordnet");
     }
 
-    public static IosEmulator emulatorWithNordnetAppInstalled(){
-        return getRunningIosEmulators()
-                .stream().filter(emulator -> isNordnetAppInstalled(emulator.udid()))
+    public static IosSimulator simulatorWithNordnetAppInstalled(){
+        return getRunningIosSimulators()
+                .stream().filter(simulator -> isNordnetAppInstalled(simulator.udid()))
                 .findFirst()
                 .orElseThrow();
     }

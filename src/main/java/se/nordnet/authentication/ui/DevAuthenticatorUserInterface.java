@@ -118,7 +118,7 @@ public class DevAuthenticatorUserInterface {
         logoPanel.setBackground(CARD_BACKGROUND);
 
         // Status panel with modern styling
-        IosEmulatorCheckPanel statusPanel = new IosEmulatorCheckPanel();
+        IosSimulatorCheckPanel statusPanel = new IosSimulatorCheckPanel();
         statusPanel.setBackground(CARD_BACKGROUND);
 
         // Search panel with improved styling
@@ -192,10 +192,10 @@ public class DevAuthenticatorUserInterface {
         JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         buttonsPanel.setBackground(CARD_BACKGROUND);
 
-        addStyledButton(buttonsPanel, "IOS Emulator", e -> openBrowserForLoginOnIosEmulator(customer));
+        addStyledButton(buttonsPanel, "IOS Simulator", e -> openBrowserForLoginOnIosSimulator(customer));
         addStyledButton(buttonsPanel, "Webapp next test", e -> openBrowserForLoginOnWebAppNextTestEnv(customer));
         addStyledButton(buttonsPanel, "Webapp next local", e -> openBrowserForLoginOnWebAppNextLocal(customer));
-        addStyledButton(buttonsPanel, "Android simulator", e -> {});
+        addStyledButton(buttonsPanel, "Android emulator", e -> {});
 
         card.add(infoPanel, BorderLayout.WEST);
         card.add(buttonsPanel, BorderLayout.CENTER);
@@ -246,7 +246,7 @@ public class DevAuthenticatorUserInterface {
     }
 
 
-    private void openBrowserForLoginOnIosEmulator(Customer customer) {
+    private void openBrowserForLoginOnIosSimulator(Customer customer) {
         URI authorizationUri = getAuthorizationUrl(customer.getBase64Id(), "http://localhost:9070", customer.country());
         openBrowser(authorizationUri);
     }

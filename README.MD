@@ -1,8 +1,8 @@
 # Nordnet dev authenticator
 
 Use this application to easily login to test environments at Nordnet. 
- - Test environment of the mobile app in IOS emulator 
- - Test environment of the mobile app in Android simulator (TODO)
+ - Test environment of the mobile app in IOS simulator 
+ - Test environment of the mobile app in Android emulator (TODO)
  - Test environment of the web app next (nordnet-test.xy)
  - Local environment of the web app next (nordnet-local.xy:8081)
 
@@ -28,6 +28,6 @@ Use this application to easily login to test environments at Nordnet.
 ## TODO
     - App Icon
     - Desktop shortcut with a real icon
-    - Add support for Android simulator
+    - Add support for Android emulator
     - Add support for partner web
     - Automatically build the latest version of the app in github and send releases to company portal!
