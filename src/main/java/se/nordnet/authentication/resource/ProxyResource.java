@@ -38,7 +38,7 @@ public class ProxyResource {
         } catch (Exception e) {
             log.error("Error terminating Nordnet app", e);
         }
-        lunchNordnetApp(code, state, targetIosSimulatorId);
+        lunchNordnetApp(code, oidcState.country(), targetIosSimulatorId);
 
         return """
                 <html>
