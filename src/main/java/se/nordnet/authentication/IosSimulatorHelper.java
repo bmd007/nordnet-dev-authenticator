@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
+import se.nordnet.authentication.type.CommandExecutionException;
 import se.nordnet.authentication.type.IosSimulator;
 
 import java.io.BufferedReader;
@@ -89,10 +90,9 @@ public class IosSimulatorHelper {
             }
             int exitCode = process.waitFor();
             if (exitCode != 0) {
-                throw new RuntimeException("Command %s execution failed, exit code: %s, output: %s".formatted(command, exitCode, output));
+                throw new CommandExecutionException(exitCode, output.toString(), userCommand);
             }
         } catch (Exception e) {
-            log.error("Error executing command", e);
             throw new RuntimeException(e);
         }
         return output.toString();
