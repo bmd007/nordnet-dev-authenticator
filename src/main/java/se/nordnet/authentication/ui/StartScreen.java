@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 import se.nordnet.authentication.type.Customer;
 import se.nordnet.authentication.property.CustomerProperties;
+import se.nordnet.authentication.type.IosSimulator;
 import se.nordnet.authentication.type.OidcState;
 
 import javax.swing.BorderFactory;
@@ -197,7 +198,7 @@ public class StartScreen {
         JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         buttonsPanel.setBackground(CARD_BACKGROUND);
 
-        addStyledButton(buttonsPanel, "IOS Simulator", e -> openBrowserForLoginOnIosSimulator(customer, "targetIosSimulatorId"));
+        addStyledButton(buttonsPanel, "IOS Simulator", e -> openBrowserForLoginOnIosSimulator(customer, null));
         addStyledButton(buttonsPanel, "Webapp next test", e -> openBrowserForLoginOnWebAppNextTestEnv(customer));
         addStyledButton(buttonsPanel, "Webapp next local", e -> openBrowserForLoginOnWebAppNextLocal(customer));
         addStyledButton(buttonsPanel, "Android emulator", e -> {
@@ -252,7 +253,7 @@ public class StartScreen {
     }
 
 
-    private void openBrowserForLoginOnIosSimulator(Customer customer, String targetIosSimulatorId) {
+    private void openBrowserForLoginOnIosSimulator(Customer customer, IosSimulator targetIosSimulatorId) {
         String state = generateOidcState(customer.country(), targetIosSimulatorId);
         URI authorizationUri = getAuthorizationUrl(customer.getBase64Id(), "http://localhost:9070", state);
         openBrowser(authorizationUri);
@@ -276,7 +277,7 @@ public class StartScreen {
         }
     }
 
-    private String generateOidcState(String country, String targetIosSimulatorId) {
+    private String generateOidcState(String country, IosSimulator targetIosSimulatorId) {
         return new OidcState(country, targetIosSimulatorId).getBase64Json();
     }
 

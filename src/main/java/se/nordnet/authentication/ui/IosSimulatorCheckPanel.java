@@ -1,6 +1,7 @@
 package se.nordnet.authentication.ui;
 
 import se.nordnet.authentication.IosSimulatorHelper;
+import se.nordnet.authentication.type.IosSimulator;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -25,7 +26,7 @@ public class IosSimulatorCheckPanel extends JPanel {
     private void updatePanel() {
         removeAll();
 
-        Optional<String> simulatorIdExists = getRunningIosSimulators().stream().map(IosSimulatorHelper.IosSimulator::udid).findFirst();
+        Optional<String> simulatorIdExists = getRunningIosSimulators().stream().map(IosSimulator::udid).findFirst();
         JLabel simulatorStatusLabel = new JLabel("IOS Simulator running: %s".formatted(simulatorIdExists.isPresent() ? GREEN_TICK : RED_CROSS));
         add(simulatorStatusLabel);
 

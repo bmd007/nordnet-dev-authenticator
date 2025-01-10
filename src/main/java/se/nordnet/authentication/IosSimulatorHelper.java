@@ -3,6 +3,7 @@ package se.nordnet.authentication;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import se.nordnet.authentication.type.IosSimulator;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -13,22 +14,12 @@ public class IosSimulatorHelper {
 
     public static final String GET_BOOTED_IOS_SIMULATORS_COMMAND = "xcrun simctl list devices booted --json | jq '.devices | to_entries | map(select(.value | length > 0) | .value[] | {udid, name})'".strip();
 
-    public record IosSimulator(String udid, String name) {
-        public IosSimulator {
-            if (udid == null || udid.isBlank()) {
-                throw new IllegalArgumentException("udid cannot be null or blank");
-            }
-            if (name == null || name.isBlank()) {
-                throw new IllegalArgumentException("name cannot be null or blank");
-            }
-        }
-    }
-
     private static final ObjectMapper objectsMapper = new ObjectMapper();
 
     public static List<IosSimulator> getRunningIosSimulators() {
         try {
-            return objectsMapper.readValue(executeCommand(GET_BOOTED_IOS_SIMULATORS_COMMAND), new TypeReference<>() {});
+            return objectsMapper.readValue(executeCommand(GET_BOOTED_IOS_SIMULATORS_COMMAND), new TypeReference<>() {
+            });
         } catch (Exception e) {
             log.error("Error getting running iOS simulators", e);
             return List.of();
@@ -42,11 +33,10 @@ public class IosSimulatorHelper {
         return executeCommand("xcrun simctl listapps " + simulatorId).contains("com.nordnet.Nordnet");
     }
 
-    public static List<String> nordnetAppContainingIosSimulatorIds() {
+    public static List<IosSimulator> iosSimulatorsWithNordnetApp() {
         return getRunningIosSimulators()
                 .stream()
                 .filter(simulator -> isNordnetAppInstalled(simulator.udid()))
-                .map(IosSimulator::udid)
                 .toList();
     }
 

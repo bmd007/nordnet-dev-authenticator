@@ -5,13 +5,15 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import se.nordnet.authentication.IosSimulatorHelper;
+import se.nordnet.authentication.type.IosSimulator;
 import se.nordnet.authentication.type.OidcState;
 
 import java.util.List;
 import java.util.Optional;
 
 import static se.nordnet.authentication.IosSimulatorHelper.executeCommand;
-import static se.nordnet.authentication.IosSimulatorHelper.nordnetAppContainingIosSimulatorIds;
+import static se.nordnet.authentication.IosSimulatorHelper.iosSimulatorsWithNordnetApp;
+import static se.nordnet.authentication.IosSimulatorsWithNordnetApp;
 
 @Slf4j
 @RestController
@@ -53,7 +55,7 @@ public class ProxyResource {
     public String openSimulatorWithAuthzCode(@RequestParam String code, @RequestParam String state) {
         OidcState oidcState = OidcState.fromBase64Json(state);
 
-        List<String> iosSimulators_WithNordetApp_id = nordnetAppContainingIosSimulatorIds();
+        List<String> iosSimulators_WithNordetApp_id = iosSimulatorsWithNordnetApp().stream().map(IosSimulator::udid).toList();
         if (iosSimulators_WithNordetApp_id.isEmpty()) {
             throw new IllegalStateException("No iOS simulator with Nordnet app installed found");
         }

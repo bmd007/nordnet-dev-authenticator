@@ -6,15 +6,11 @@ import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotBlank;
 
 import java.util.Base64;
-import java.util.Set;
 
-public record OidcState(@NotBlank String country, @Nullable String targetIosSimulatorId) {
-    private static final Set<String> COUNTRY_CODES = Set.of("SE", "NO", "FI", "DK");
+public record OidcState(@NotBlank String country, @Nullable IosSimulator targetIosSimulatorId) {
+
     public OidcState {
         country = country.toUpperCase();
-        if (!COUNTRY_CODES.contains(country)) {
-            throw new IllegalArgumentException("CountryCode must be one of " + COUNTRY_CODES);
-        }
     }
 
     @JsonIgnore
