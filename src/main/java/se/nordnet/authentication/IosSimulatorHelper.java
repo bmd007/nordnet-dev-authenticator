@@ -2,6 +2,7 @@ package se.nordnet.authentication;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import se.nordnet.authentication.type.IosSimulator;
 
@@ -40,12 +41,37 @@ public class IosSimulatorHelper {
                 .toList();
     }
 
-    public static boolean isNordeAppRunning(String simulatorId) {
+    public static boolean isNordeAppRunning(@NotNull IosSimulator iosSimulator) {
+        String simulatorId = iosSimulator.udid();
         if (simulatorId == null) {
             return false;
         }
-        return executeCommand("xcrun simctl spawn " + simulatorId + " launchctl list")
+        try {
+            return executeCommand("xcrun simctl spawn " + simulatorId + " launchctl list")
                 .contains("com.nordnet.Nordnet");
+        } catch (Exception e) {
+            log.error("Error checking if Nordnet app is running on iOS simulator {}", iosSimulator, e);
+            return false;
+        }
+    }
+
+    public static void terminateNordnetApp(IosSimulator iosSimulator) {
+        try {
+            executeCommand("xcrun simctl terminate %s com.nordnet.Nordnet".formatted(iosSimulator.udid()));
+        } catch (Exception e) {
+            log.error("Error terminating Nordnet app on iOS simulator {}", iosSimulator, e);
+        }
+    }
+
+    public static void lunchNordnetApp(String code, String country, IosSimulator iosSimulator) {
+        String udid = iosSimulator.udid();
+        try {
+            executeCommand("""
+                xcrun simctl launch %s com.nordnet.Nordnet -entraIdAuthzCode "%s" -countryCode "%s"
+                """.formatted(udid, code, country).stripIndent());
+        } catch (Exception e) {
+            log.error("Error launching Nordnet app on iOS simulator {}", iosSimulator ,e);
+        }
     }
 
     public static String executeCommand(String userCommand) {
@@ -63,11 +89,11 @@ public class IosSimulatorHelper {
             }
             int exitCode = process.waitFor();
             if (exitCode != 0) {
-                log.error("Command {} execution failed with exit code: {}, result: {}", userCommand, exitCode, output);
-                throw new RuntimeException("Command %s execution failed with exit code: %s".formatted(command, exitCode));
+                throw new RuntimeException("Command %s execution failed, exit code: %s, output: %s".formatted(command, exitCode, output));
             }
         } catch (Exception e) {
-            throw new RuntimeException("Error executing command %s".formatted(command), e);
+            log.error("Error executing command", e);
+            throw new RuntimeException(e);
         }
         return output.toString();
     }

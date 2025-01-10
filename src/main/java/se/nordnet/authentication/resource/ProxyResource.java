@@ -13,7 +13,8 @@ import java.util.Optional;
 
 import static se.nordnet.authentication.IosSimulatorHelper.executeCommand;
 import static se.nordnet.authentication.IosSimulatorHelper.iosSimulatorsWithNordnetApp;
-import static se.nordnet.authentication.IosSimulatorsWithNordnetApp;
+import static se.nordnet.authentication.IosSimulatorHelper.lunchNordnetApp;
+import static se.nordnet.authentication.IosSimulatorHelper.terminateNordnetApp;
 
 @Slf4j
 @RestController
@@ -55,27 +56,23 @@ public class ProxyResource {
     public String openSimulatorWithAuthzCode(@RequestParam String code, @RequestParam String state) {
         OidcState oidcState = OidcState.fromBase64Json(state);
 
-        List<String> iosSimulators_WithNordetApp_id = iosSimulatorsWithNordnetApp().stream().map(IosSimulator::udid).toList();
+        List<IosSimulator> iosSimulators_WithNordetApp_id = iosSimulatorsWithNordnetApp();
         if (iosSimulators_WithNordetApp_id.isEmpty()) {
             throw new IllegalStateException("No iOS simulator with Nordnet app installed found");
         }
-        String targetIosSimulatorId = Optional.ofNullable(oidcState)
-                .map(OidcState::targetIosSimulatorId)
+        IosSimulator targetIosSimulator = Optional.ofNullable(oidcState)
+                .map(OidcState::targetIosSimulator)
                 .filter(iosSimulators_WithNordetApp_id::contains)
                 .orElseGet(() -> iosSimulators_WithNordetApp_id.get(0));
-        try {
-            terminateNordnetAppOnIosSimulator(targetIosSimulatorId);
-        } catch (Exception e) {
-            log.error("Error terminating Nordnet app on iOS simulator", e);
-        }
-        waitForNordnetAppTermination(targetIosSimulatorId);
-        lunchNordnetApp(code, oidcState.country(), targetIosSimulatorId);
+        terminateNordnetApp(targetIosSimulator);
+        waitForNordnetAppTermination(targetIosSimulator);
+        lunchNordnetApp(code, oidcState.country(), targetIosSimulator);
 
         return CLOSE_TAB_HTML;
     }
 
-    private static void waitForNordnetAppTermination(String targetIosSimulatorId) {
-        while (!IosSimulatorHelper.isNordeAppRunning(targetIosSimulatorId)) {
+    private static void waitForNordnetAppTermination(IosSimulator targetIosSimulator) {
+        while (!IosSimulatorHelper.isNordeAppRunning(targetIosSimulator)) {
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
@@ -84,13 +81,4 @@ public class ProxyResource {
         }
     }
 
-    private static void lunchNordnetApp(String code, String country, String udid) {
-        executeCommand("""
-                xcrun simctl launch %s com.nordnet.Nordnet -entraIdAuthzCode "%s" -countryCode "%s"
-                """.formatted(udid, code, country).stripIndent());
-    }
-
-    private static void terminateNordnetAppOnIosSimulator(String iosSimulatorId) {
-        executeCommand("xcrun simctl terminate %s com.nordnet.Nordnet".formatted(iosSimulatorId));
-    }
 }

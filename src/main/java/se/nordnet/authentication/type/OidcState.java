@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 
 import java.util.Base64;
 
-public record OidcState(@NotBlank String country, @Nullable IosSimulator targetIosSimulatorId) {
+public record OidcState(@NotBlank String country, @Nullable IosSimulator targetIosSimulator) {
 
     public OidcState {
         country = country.toUpperCase();
