@@ -48,9 +48,8 @@ public class IosSimulatorHelper {
             return false;
         }
         try {
-            var listOfRunningApps =  executeCommand("xcrun simctl spawn " + simulatorId + " launchctl list");
-            log.info("List of running apps on iOS simulator {}: {}", iosSimulator, listOfRunningApps);
-            return listOfRunningApps.contains("com.nordnet.Nordnet");
+            return executeCommand("xcrun simctl spawn " + simulatorId + " launchctl list")
+                    .contains("com.nordnet.Nordnet");
         } catch (Exception e) {
             log.error("Error checking if Nordnet app is running on iOS simulator {}", iosSimulator, e);
             return false;
