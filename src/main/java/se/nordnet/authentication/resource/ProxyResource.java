@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static se.nordnet.authentication.IosSimulatorHelper.executeCommand;
-import static se.nordnet.authentication.IosSimulatorHelper.simulatorsWithNordnetAppInstalled;
+import static se.nordnet.authentication.IosSimulatorHelper.iosSimulatorsWithNordnetAppInstalled;
 
 @Slf4j
 @RestController
@@ -22,7 +22,7 @@ public class ProxyResource {
     public String openSimulatorWithAuthzCode(@RequestParam String code, @RequestParam String state) {
         OidcState oidcState = OidcState.fromBase64Json(state);
 
-        List<String> iosSimulatorWithNordetApp = simulatorsWithNordnetAppInstalled()
+        List<String> iosSimulatorWithNordetApp = iosSimulatorsWithNordnetAppInstalled()
                 .stream()
                 .map(IosSimulatorHelper.IosSimulator::udid)
                 .toList();
@@ -33,7 +33,6 @@ public class ProxyResource {
                 .map(OidcState::targetIosSimulatorId)
                 .filter(iosSimulatorWithNordetApp::contains)
                 .orElseGet(() -> iosSimulatorWithNordetApp.get(0));
-
         try {
             terminateNordnetAppOnIosSimulator(targetIosSimulatorId);
         } catch (Exception e) {
