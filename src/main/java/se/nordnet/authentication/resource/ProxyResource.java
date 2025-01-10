@@ -83,7 +83,7 @@ public class ProxyResource {
     private static void lunchNordnetApp(String code, String country, String udid) {
         executeCommand("""
                 xcrun simctl launch %s com.nordnet.Nordnet -entraIdAuthzCode "%s" -countryCode "%s"
-                """.stripIndent().formatted(udid, code, country));
+                """.formatted(udid, code, country).stripIndent());
     }
 
     private static void terminateNordnetAppOnIosSimulator(String iosSimulatorId) {
