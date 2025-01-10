@@ -9,10 +9,6 @@ import java.util.Base64;
 
 public record OidcState(@NotBlank String country, @Nullable IosSimulator targetIosSimulator) {
 
-    public OidcState {
-        country = country.toUpperCase();
-    }
-
     @JsonIgnore
     public String getBase64Json() {
         try {
