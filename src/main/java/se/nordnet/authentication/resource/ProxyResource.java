@@ -36,7 +36,15 @@ public class ProxyResource {
         try {
             terminateNordnetAppOnIosSimulator(targetIosSimulatorId);
         } catch (Exception e) {
-            log.error("Error terminating Nordnet app", e);
+            log.error("Error terminating Nordnet app on iOS simulator", e);
+        }
+        //todo wait until nordnet app is terminated
+        while (IosSimulatorHelper.isNordeAppRunning(targetIosSimulatorId)) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                log.error("Error waiting for Nordnet app to terminate", e);
+            }
         }
         lunchNordnetApp(code, oidcState.country(), targetIosSimulatorId);
 
@@ -72,10 +80,10 @@ public class ProxyResource {
                 """;
     }
 
-    private static void lunchNordnetApp(String code, String state, String udid) {
+    private static void lunchNordnetApp(String code, String country, String udid) {
         executeCommand("""
                 xcrun simctl launch %s com.nordnet.Nordnet -entraIdAuthzCode "%s" -countryCode "%s"
-                """.stripIndent().formatted(udid, code, state));
+                """.stripIndent().formatted(udid, code, country));
     }
 
     private static void terminateNordnetAppOnIosSimulator(String iosSimulatorId) {

@@ -49,11 +49,19 @@ public class IosSimulatorHelper {
                 .toList();
     }
 
+    public static boolean isNordeAppRunning(String simulatorId) {
+        if (simulatorId == null) {
+            return false;
+        }
+        return executeCommand("xcrun simctl spawn " + simulatorId + " launchctl list")
+                .contains("com.nordnet.Nordnet");
+    }
+
     public static String executeCommand(String userCommand) {
         List<String> command = List.of("sh", "-c", userCommand);
-        StringBuilder output = new StringBuilder();
         ProcessBuilder processBuilder = new ProcessBuilder(command);
         processBuilder.redirectErrorStream(true);
+        StringBuilder output = new StringBuilder();
         try {
             Process process = processBuilder.start();
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
@@ -64,6 +72,7 @@ public class IosSimulatorHelper {
             }
             int exitCode = process.waitFor();
             if (exitCode != 0) {
+                log.error("Command {} execution failed with exit code: {}, result: {}", userCommand, exitCode, output);
                 throw new RuntimeException("Command %s execution failed with exit code: %s".formatted(command, exitCode));
             }
         } catch (Exception e) {
