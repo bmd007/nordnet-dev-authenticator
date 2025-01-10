@@ -49,7 +49,7 @@ public class IosSimulatorHelper {
         }
         try {
             return executeCommand("xcrun simctl spawn " + simulatorId + " launchctl list")
-                .contains("com.nordnet.Nordnet");
+                    .contains("com.nordnet.Nordnet");
         } catch (Exception e) {
             log.error("Error checking if Nordnet app is running on iOS simulator {}", iosSimulator, e);
             return false;
@@ -57,21 +57,17 @@ public class IosSimulatorHelper {
     }
 
     public static void terminateNordnetApp(IosSimulator iosSimulator) {
-        try {
-            executeCommand("xcrun simctl terminate %s com.nordnet.Nordnet".formatted(iosSimulator.udid()));
-        } catch (Exception e) {
-            log.error("Error terminating Nordnet app on iOS simulator {}", iosSimulator, e);
-        }
+        executeCommand("xcrun simctl terminate %s com.nordnet.Nordnet".formatted(iosSimulator.udid()));
     }
 
     public static void lunchNordnetApp(String code, String country, IosSimulator iosSimulator) {
         String udid = iosSimulator.udid();
         try {
             executeCommand("""
-                xcrun simctl launch %s com.nordnet.Nordnet -entraIdAuthzCode "%s" -countryCode "%s"
-                """.formatted(udid, code, country).stripIndent());
+                    xcrun simctl launch %s com.nordnet.Nordnet -entraIdAuthzCode "%s" -countryCode "%s"
+                    """.formatted(udid, code, country).stripIndent());
         } catch (Exception e) {
-            log.error("Error launching Nordnet app on iOS simulator {}", iosSimulator ,e);
+            log.error("Error launching Nordnet app on iOS simulator {}", iosSimulator, e);
         }
     }
 
