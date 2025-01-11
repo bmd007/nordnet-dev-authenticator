@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
-import se.nordnet.authentication.type.Customer;
 import se.nordnet.authentication.property.CustomerProperties;
+import se.nordnet.authentication.type.Customer;
 import se.nordnet.authentication.type.IosSimulator;
 import se.nordnet.authentication.type.OidcState;
 
@@ -201,7 +201,8 @@ public class StartScreen {
         addStyledButton(buttonsPanel, "IOS Simulator", e -> openBrowserForLoginOnIosSimulator(customer, List.of()));
         addStyledButton(buttonsPanel, "Webapp next test", e -> openBrowserForLoginOnWebAppNextTestEnv(customer));
         addStyledButton(buttonsPanel, "Webapp next local", e -> openBrowserForLoginOnWebAppNextLocal(customer));
-        addStyledButton(buttonsPanel, "Android emulator", e -> {});
+        addStyledButton(buttonsPanel, "Android emulator", e -> {
+        });
 
         card.add(infoPanel, BorderLayout.WEST);
         card.add(buttonsPanel, BorderLayout.CENTER);
@@ -251,7 +252,6 @@ public class StartScreen {
         cardsPanel.repaint();
     }
 
-
     private void openBrowserForLoginOnIosSimulator(Customer customer, List<IosSimulator> targetIosSimulators) {
         String state = new OidcState(customer.country(), targetIosSimulators).getBase64Json();
         URI authorizationUri = getAuthorizationUrl(customer.getBase64Id(), "http://localhost:9070", state);
@@ -284,7 +284,8 @@ public class StartScreen {
                 .queryParam("nonce", nonce)
                 .queryParam("scope", "api://fe88cb91-1d7f-4d8e-a4e7-b2287bce567b/Read openid")
                 .queryParam("state", state)
-                .build().toUri();
+                .build()
+                .toUri();
     }
 
     class SearchDocumentListener implements javax.swing.event.DocumentListener {
