@@ -60,14 +60,14 @@ public class ProxyResource {
         if (iosSimulatorsWithNordnetApp.isEmpty()) {
             throw new IllegalStateException("Running IOS simulator, with Nordnet app installed, NOT found!");
         }
-        List<IosSimulator> targetIosSimulators = oidcState.targetIosSimulators().stream()
-                .filter(iosSimulatorsWithNordnetApp::contains).distinct().toList();
-        if (targetIosSimulators.isEmpty()) {
-            targetIosSimulators = List.of(iosSimulatorsWithNordnetApp.get(0));
-        }
-        targetIosSimulators.forEach(iosSimulator -> {
-            IosSimulatorHelper.terminateNordnetApp(iosSimulator);// unfortunately this doesn't result in log out! manually log out in the app required
-            IosSimulatorHelper.lunchNordnetApp(code, oidcState.country(), iosSimulator);
-        });
+        oidcState.targetIosSimulators()
+                .stream()
+                .filter(iosSimulatorsWithNordnetApp::contains)
+                .distinct()
+                .forEach(iosSimulator -> {
+                    // unfortunately this doesn't result in log out! manually log out in the app required
+                    IosSimulatorHelper.terminateNordnetApp(iosSimulator);
+                    IosSimulatorHelper.lunchNordnetApp(code, oidcState.country(), iosSimulator);
+                });
     }
 }

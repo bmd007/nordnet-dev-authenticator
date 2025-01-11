@@ -17,7 +17,7 @@ public class IosSimulatorHelper {
 
     private static final ObjectMapper objectsMapper = new ObjectMapper();
 
-    public static List<IosSimulator> getRunningIosSimulators() {
+    public static List<IosSimulator> runningIosSimulators() {
         try {
             return objectsMapper.readValue(executeCommand(GET_BOOTED_IOS_SIMULATORS_COMMAND), new TypeReference<>() {
             });
@@ -27,18 +27,18 @@ public class IosSimulatorHelper {
         }
     }
 
-    public static boolean isNordnetAppInstalled(String simulatorId) {
-        return executeCommand("xcrun simctl listapps " + simulatorId).contains("com.nordnet.Nordnet");
+    public static boolean isNordnetAppInstalled(IosSimulator simulator) {
+        return executeCommand("xcrun simctl listapps " + simulator.udid()).contains("com.nordnet.Nordnet");
     }
 
     public static List<IosSimulator> runningSimulatorsWithNordnetApp() {
-        return getRunningIosSimulators()
+        return runningIosSimulators()
                 .stream()
-                .filter(simulator -> isNordnetAppInstalled(simulator.udid()))
+                .filter(IosSimulatorHelper::isNordnetAppInstalled)
                 .toList();
     }
 
-    public static boolean isNordeAppRunning(IosSimulator iosSimulator) {
+    public static boolean isNordetAppOpen(IosSimulator iosSimulator) {
         String simulatorId = iosSimulator.udid();
         try {
             return executeCommand("xcrun simctl spawn " + simulatorId + " launchctl list")
@@ -52,7 +52,7 @@ public class IosSimulatorHelper {
     public static void terminateNordnetApp(IosSimulator iosSimulator) {
         try {
             executeCommand("xcrun simctl terminate %s com.nordnet.Nordnet".formatted(iosSimulator.udid()));
-            while (isNordeAppRunning(iosSimulator)) {
+            while (isNordetAppOpen(iosSimulator)) {
                 Thread.sleep(1000);
             }
         } catch (Exception e) {

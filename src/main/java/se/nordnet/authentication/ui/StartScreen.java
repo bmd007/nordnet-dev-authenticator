@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
+import se.nordnet.authentication.IosSimulatorHelper;
 import se.nordnet.authentication.property.CustomerProperties;
 import se.nordnet.authentication.type.Customer;
 import se.nordnet.authentication.type.IosSimulator;
@@ -198,7 +199,7 @@ public class StartScreen {
         JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         buttonsPanel.setBackground(CARD_BACKGROUND);
 
-        addStyledButton(buttonsPanel, "IOS Simulator", e -> openBrowserForLoginOnIosSimulator(customer, List.of()));
+        addStyledButton(buttonsPanel, "IOS Simulator", e -> openBrowserForLoginOnIosSimulator(customer, List.of(IosSimulatorHelper.runningSimulatorsWithNordnetApp().get(0))));
         addStyledButton(buttonsPanel, "Webapp next test", e -> openBrowserForLoginOnWebAppNextTestEnv(customer));
         addStyledButton(buttonsPanel, "Webapp next local", e -> openBrowserForLoginOnWebAppNextLocal(customer));
         addStyledButton(buttonsPanel, "Android emulator", e -> {
