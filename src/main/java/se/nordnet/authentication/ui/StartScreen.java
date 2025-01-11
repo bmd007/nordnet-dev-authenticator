@@ -1,6 +1,5 @@
 package se.nordnet.authentication.ui;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -14,6 +13,7 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -43,16 +43,15 @@ public class StartScreen {
     private static final Color BUTTON_HOVER = new Color(0, 71, 149);
 
     private final CustomerProperties customerProperties;
-    private final ObjectMapper objectMapper;
+    private final JCheckBox loginOnAllSimulatorsCheckBox = new JCheckBox("Login on all iOS simulators");
 
     private final JFrame frame = new JFrame("Nordnet Dev Authenticator");
     private final Desktop desktop = Desktop.getDesktop();
     private final JPanel mainPanel = new JPanel();
-    private final JPanel cardsPanel = new JPanel();
+    private final JPanel customerCardsPanel = new JPanel();
 
-    public StartScreen(CustomerProperties customerProperties, ObjectMapper objectMapper) {
+    public StartScreen(CustomerProperties customerProperties) {
         this.customerProperties = customerProperties;
-        this.objectMapper = objectMapper;
         setupMainFrame();
     }
 
@@ -74,12 +73,12 @@ public class StartScreen {
         mainPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
 
         // Setup cards panel
-        cardsPanel.setLayout(new BoxLayout(cardsPanel, BoxLayout.Y_AXIS));
-        cardsPanel.setBackground(BACKGROUND_COLOR);
+        customerCardsPanel.setLayout(new BoxLayout(customerCardsPanel, BoxLayout.Y_AXIS));
+        customerCardsPanel.setBackground(BACKGROUND_COLOR);
 
         // Create and add components
         JPanel headerPanel = createHeader();
-        JScrollPane scrollPane = new JScrollPane(cardsPanel);
+        JScrollPane scrollPane = new JScrollPane(customerCardsPanel);
         scrollPane.setBorder(null);
         scrollPane.getViewport().setBackground(BACKGROUND_COLOR);
 
@@ -93,7 +92,7 @@ public class StartScreen {
         frame.setVisible(true);
 
         // Initial render
-        renderCustomerCards(customerProperties.customers().subList(0, 3));
+        renderCustomerLoginCards(customerProperties.customers());
     }
 
     private void customizeUIComponents() {
@@ -120,27 +119,31 @@ public class StartScreen {
                 new EmptyBorder(20, 20, 20, 20)
         ));
 
-        // Logo panel with proper scaling
         NordnetLogoPanel logoPanel = new NordnetLogoPanel();
         logoPanel.setBackground(CARD_BACKGROUND);
 
-        // Status panel with modern styling
-        IosSimulatorCheckPanel statusPanel = new IosSimulatorCheckPanel();
-        statusPanel.setBackground(CARD_BACKGROUND);
+        IosSimulatorStatusPanel iosStatusPanel = new IosSimulatorStatusPanel();
+        iosStatusPanel.setBackground(CARD_BACKGROUND);
 
-        // Search panel with improved styling
-        JPanel searchPanel = createSearchPanel();
-
-        // Layout components
         JPanel topSection = new JPanel(new BorderLayout(20, 0));
         topSection.setBackground(CARD_BACKGROUND);
         topSection.add(logoPanel, BorderLayout.WEST);
-        topSection.add(statusPanel, BorderLayout.EAST);
+        topSection.add(iosStatusPanel, BorderLayout.EAST);
 
         header.add(topSection, BorderLayout.NORTH);
-        header.add(searchPanel, BorderLayout.SOUTH);
+        header.add(createSearchPanel(), BorderLayout.SOUTH);
+        header.add(createSettingsPanel(), BorderLayout.EAST);
 
         return header;
+    }
+
+    private JPanel createSettingsPanel() {
+        JPanel settingsPanel = new JPanel(new FlowLayout(FlowLayout.TRAILING));
+        settingsPanel.setBackground(CARD_BACKGROUND);
+        loginOnAllSimulatorsCheckBox.setBackground(CARD_BACKGROUND);
+        loginOnAllSimulatorsCheckBox.setSelected(false);
+        settingsPanel.add(loginOnAllSimulatorsCheckBox);
+        return settingsPanel;
     }
 
     private JPanel createSearchPanel() {
@@ -175,7 +178,28 @@ public class StartScreen {
         ));
         card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100));
 
-        // Customer info section
+        card.add(createCustomerInfoPanel(customer), BorderLayout.WEST);
+
+        JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        buttonsPanel.setBackground(CARD_BACKGROUND);
+        iosSimulatorLoginPanel(customer, buttonsPanel);
+        addStyledButton(buttonsPanel, "Webapp next test", e -> openBrowserForLoginOnWebAppNextTestEnv(customer));
+        addStyledButton(buttonsPanel, "Webapp next local", e -> openBrowserForLoginOnWebAppNextLocal(customer));
+        addStyledButton(buttonsPanel, "Android emulator", e -> {
+        });
+        card.add(buttonsPanel, BorderLayout.CENTER);
+
+        return card;
+    }
+
+    private void iosSimulatorLoginPanel(Customer customer, JPanel buttonsPanel) {
+        List<IosSimulator> targetIosSimulators = loginOnAllSimulatorsCheckBox.isSelected() ?
+                IosSimulatorHelper.runningSimulatorsWithNordnetApp() :
+                List.of(IosSimulatorHelper.runningSimulatorsWithNordnetApp().get(0));
+        addStyledButton(buttonsPanel, "iOS Simulator", e -> openBrowserForLoginOnIosSimulator(customer, targetIosSimulators));
+    }
+
+    private JPanel createCustomerInfoPanel(Customer customer) {
         JPanel infoPanel = new JPanel(new BorderLayout());
         infoPanel.setBackground(CARD_BACKGROUND);
 
@@ -184,7 +208,7 @@ public class StartScreen {
         nameLabel.setForeground(TEXT_COLOR);
 
         JLabel countryLabel = new JLabel(customer.country());
-        countryLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        countryLabel.setFont(new Font("Segoe UI", Font.PLAIN, 16));
         countryLabel.setForeground(new Color(128, 128, 128));
 
         JLabel customerIdLabel = new JLabel(customer.id());
@@ -194,21 +218,7 @@ public class StartScreen {
         infoPanel.add(nameLabel, BorderLayout.NORTH);
         infoPanel.add(countryLabel, BorderLayout.CENTER);
         infoPanel.add(customerIdLabel, BorderLayout.SOUTH);
-
-        // Buttons panel
-        JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
-        buttonsPanel.setBackground(CARD_BACKGROUND);
-
-        addStyledButton(buttonsPanel, "IOS Simulator", e -> openBrowserForLoginOnIosSimulator(customer, List.of(IosSimulatorHelper.runningSimulatorsWithNordnetApp().get(0))));
-        addStyledButton(buttonsPanel, "Webapp next test", e -> openBrowserForLoginOnWebAppNextTestEnv(customer));
-        addStyledButton(buttonsPanel, "Webapp next local", e -> openBrowserForLoginOnWebAppNextLocal(customer));
-        addStyledButton(buttonsPanel, "Android emulator", e -> {
-        });
-
-        card.add(infoPanel, BorderLayout.WEST);
-        card.add(buttonsPanel, BorderLayout.CENTER);
-
-        return card;
+        return infoPanel;
     }
 
     private void addStyledButton(JPanel panel, String text, java.awt.event.ActionListener listener) {
@@ -240,17 +250,17 @@ public class StartScreen {
                         customer.id().toLowerCase().contains(query.toLowerCase()))
                 .toList();
         filteredCustomers = filteredCustomers.isEmpty() ? customerProperties.customers().subList(0, 3) : filteredCustomers;
-        renderCustomerCards(filteredCustomers);
+        renderCustomerLoginCards(filteredCustomers);
     }
 
-    private void renderCustomerCards(List<Customer> customers) {
-        cardsPanel.removeAll();
+    private void renderCustomerLoginCards(List<Customer> customers) {
+        customerCardsPanel.removeAll();
         customers.forEach(customer -> {
-            cardsPanel.add(createCustomerCard(customer));
-            cardsPanel.add(Box.createRigidArea(new Dimension(0, 10))); // Add spacing between cards
+            customerCardsPanel.add(createCustomerCard(customer));
+            customerCardsPanel.add(Box.createRigidArea(new Dimension(0, 10))); // Add spacing between cards
         });
-        cardsPanel.revalidate();
-        cardsPanel.repaint();
+        customerCardsPanel.revalidate();
+        customerCardsPanel.repaint();
     }
 
     private void openBrowserForLoginOnIosSimulator(Customer customer, List<IosSimulator> targetIosSimulators) {

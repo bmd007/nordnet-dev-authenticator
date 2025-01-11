@@ -17,7 +17,7 @@ public class ProxyResource {
     public static final String CLOSE_TAB_HTML = """
             <html>
             <head>
-                <title>IOS Simulator</title>
+                <title>iOS Simulator</title>
                 <style>
                     body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
                     .message { font-size: 20px; margin-top: 20px; }
@@ -58,7 +58,7 @@ public class ProxyResource {
     private void lunchNordnetAppOnIosSimulators(String code, OidcState oidcState) {
         List<IosSimulator> iosSimulatorsWithNordnetApp = IosSimulatorHelper.runningSimulatorsWithNordnetApp();
         if (iosSimulatorsWithNordnetApp.isEmpty()) {
-            throw new IllegalStateException("Running IOS simulator, with Nordnet app installed, NOT found!");
+            throw new IllegalStateException("Running iOS simulator, with Nordnet app installed, NOT found!");
         }
         oidcState.targetIosSimulators()
                 .stream()

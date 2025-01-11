@@ -11,12 +11,12 @@ import java.util.Optional;
 import static se.nordnet.authentication.IosSimulatorHelper.runningIosSimulators;
 import static se.nordnet.authentication.IosSimulatorHelper.isNordnetAppInstalled;
 
-public class IosSimulatorCheckPanel extends JPanel {
+public class IosSimulatorStatusPanel extends JPanel {
 
     private static final String GREEN_TICK = "✅";
     private static final String RED_CROSS = "❌";
 
-    public IosSimulatorCheckPanel() {
+    public IosSimulatorStatusPanel() {
         super();
         setLayout(new GridLayout(4, 1, 1, 1));
         updatePanel();
@@ -26,7 +26,7 @@ public class IosSimulatorCheckPanel extends JPanel {
         removeAll();
 
         Optional<IosSimulator> anyRunningIosSimulator = runningIosSimulators().stream().findFirst();
-        JLabel simulatorStatusLabel = new JLabel("IOS Simulator running: %s".formatted(anyRunningIosSimulator.isPresent() ? GREEN_TICK : RED_CROSS));
+        JLabel simulatorStatusLabel = new JLabel("iOS Simulator running: %s".formatted(anyRunningIosSimulator.isPresent() ? GREEN_TICK : RED_CROSS));
         add(simulatorStatusLabel);
 
         JLabel nordnetAppInstalledLabel = new JLabel("Nordnet app installed: %s".formatted(anyRunningIosSimulator.isPresent() && isNordnetAppInstalled(anyRunningIosSimulator.get()) ? GREEN_TICK : RED_CROSS));
