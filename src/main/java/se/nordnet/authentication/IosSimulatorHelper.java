@@ -2,7 +2,6 @@ package se.nordnet.authentication;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import se.nordnet.authentication.type.CommandExecutionException;
 import se.nordnet.authentication.type.IosSimulator;
@@ -29,24 +28,18 @@ public class IosSimulatorHelper {
     }
 
     public static boolean isNordnetAppInstalled(String simulatorId) {
-        if (simulatorId == null) {
-            return false;
-        }
         return executeCommand("xcrun simctl listapps " + simulatorId).contains("com.nordnet.Nordnet");
     }
 
-    public static List<IosSimulator> iosSimulatorsWithNordnetApp() {
+    public static List<IosSimulator> runningSimulatorsWithNordnetApp() {
         return getRunningIosSimulators()
                 .stream()
                 .filter(simulator -> isNordnetAppInstalled(simulator.udid()))
                 .toList();
     }
 
-    public static boolean isNordeAppRunning(@NotNull IosSimulator iosSimulator) {
+    public static boolean isNordeAppRunning(IosSimulator iosSimulator) {
         String simulatorId = iosSimulator.udid();
-        if (simulatorId == null) {
-            throw new IllegalArgumentException("IOS Simulator ID must not be null");
-        }
         try {
             return executeCommand("xcrun simctl spawn " + simulatorId + " launchctl list")
                     .contains("com.nordnet.Nordnet");
@@ -59,6 +52,9 @@ public class IosSimulatorHelper {
     public static void terminateNordnetApp(IosSimulator iosSimulator) {
         try {
             executeCommand("xcrun simctl terminate %s com.nordnet.Nordnet".formatted(iosSimulator.udid()));
+            while (isNordeAppRunning(iosSimulator)) {
+                Thread.sleep(1000);
+            }
         } catch (Exception e) {
             log.error("Error terminating Nordnet app on iOS simulator {}", iosSimulator, e);
         }
@@ -95,6 +91,7 @@ public class IosSimulatorHelper {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+
         return output.toString();
     }
 }

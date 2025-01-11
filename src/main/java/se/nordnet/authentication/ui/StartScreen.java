@@ -198,11 +198,10 @@ public class StartScreen {
         JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         buttonsPanel.setBackground(CARD_BACKGROUND);
 
-        addStyledButton(buttonsPanel, "IOS Simulator", e -> openBrowserForLoginOnIosSimulator(customer, null));
+        addStyledButton(buttonsPanel, "IOS Simulator", e -> openBrowserForLoginOnIosSimulator(customer, List.of()));
         addStyledButton(buttonsPanel, "Webapp next test", e -> openBrowserForLoginOnWebAppNextTestEnv(customer));
         addStyledButton(buttonsPanel, "Webapp next local", e -> openBrowserForLoginOnWebAppNextLocal(customer));
-        addStyledButton(buttonsPanel, "Android emulator", e -> {
-        });
+        addStyledButton(buttonsPanel, "Android emulator", e -> {});
 
         card.add(infoPanel, BorderLayout.WEST);
         card.add(buttonsPanel, BorderLayout.CENTER);
@@ -253,8 +252,8 @@ public class StartScreen {
     }
 
 
-    private void openBrowserForLoginOnIosSimulator(Customer customer, IosSimulator targetIosSimulatorId) {
-        String state = generateOidcState(customer.country(), targetIosSimulatorId);
+    private void openBrowserForLoginOnIosSimulator(Customer customer, List<IosSimulator> targetIosSimulators) {
+        String state = new OidcState(customer.country(), targetIosSimulators).getBase64Json();
         URI authorizationUri = getAuthorizationUrl(customer.getBase64Id(), "http://localhost:9070", state);
         openBrowser(authorizationUri);
     }
@@ -275,10 +274,6 @@ public class StartScreen {
         } catch (Exception e) {
             log.error("Failed to open browser", e);
         }
-    }
-
-    private String generateOidcState(String country, IosSimulator targetIosSimulatorId) {
-        return new OidcState(country, targetIosSimulatorId).getBase64Json();
     }
 
     private URI getAuthorizationUrl(String nonce, String redirectUri, String state) {
