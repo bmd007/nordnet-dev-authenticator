@@ -253,7 +253,7 @@ public class StartScreen {
 
 
     private void openBrowserForLoginOnIosSimulator(Customer customer, List<IosSimulator> targetIosSimulators) {
-        String state = generateOidcState(customer.country(), targetIosSimulators);
+        String state = new OidcState(customer.country(), targetIosSimulators).getBase64Json();
         URI authorizationUri = getAuthorizationUrl(customer.getBase64Id(), "http://localhost:9070", state);
         openBrowser(authorizationUri);
     }
@@ -274,10 +274,6 @@ public class StartScreen {
         } catch (Exception e) {
             log.error("Failed to open browser", e);
         }
-    }
-
-    private String generateOidcState(String country, List<IosSimulator> targetIosSimulators) {
-        return new OidcState(country, targetIosSimulators).getBase64Json();
     }
 
     private URI getAuthorizationUrl(String nonce, String redirectUri, String state) {
