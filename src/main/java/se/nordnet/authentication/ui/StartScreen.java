@@ -7,6 +7,7 @@ import se.nordnet.authentication.IosSimulatorHelper;
 import se.nordnet.authentication.property.CustomerProperties;
 import se.nordnet.authentication.type.Customer;
 import se.nordnet.authentication.type.IosSimulator;
+import se.nordnet.authentication.type.MobileSimulator;
 import se.nordnet.authentication.type.OidcState;
 
 import javax.swing.BorderFactory;
@@ -260,9 +261,12 @@ public class StartScreen {
         List<IosSimulator> targetIosSimulators = loginOnAllSimulatorsCheckBox.isSelected() ?
                 IosSimulatorHelper.runningSimulatorsWithNordnetApp() :
                 List.of(IosSimulatorHelper.runningSimulatorsWithNordnetApp().get(0));
-        String state = new OidcState(customer.country(), targetIosSimulators).getBase64Json();
-        URI authorizationUri = getAuthorizationUrl(customer.getBase64Id(), "http://localhost:9070", state);
-        openBrowser(authorizationUri);
+        targetIosSimulators.forEach(iosSimulator -> {
+            MobileSimulator targetSimulator = new MobileSimulator(iosSimulator);
+            String state = new OidcState(customer.country(), targetSimulator).getBase64Json();
+            URI authorizationUri = getAuthorizationUrl(customer.getBase64Id(), "http://localhost:9070", state);
+            openBrowser(authorizationUri);
+        });
     }
 
     private void openBrowserForLoginOnWebAppNextTestEnv(Customer customer) {

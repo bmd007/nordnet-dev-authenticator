@@ -17,7 +17,7 @@ public class ProxyResource {
     public static final String CLOSE_TAB_HTML = """
             <html>
             <head>
-                <title>iOS Simulator</title>
+                <title>%s</title>
                 <style>
                     body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
                     .message { font-size: 20px; margin-top: 20px; }
@@ -39,7 +39,7 @@ public class ProxyResource {
                 </script>
             </head>
             <body>
-                <h1>Check your running/booted iOS simulator</h1>
+                <h1>Check %s</h1>
                 <p class="message">This window/tab will be closed automatically in <span id="timer">5</span> seconds.</p>
             </body>
             </html>
@@ -49,25 +49,22 @@ public class ProxyResource {
     @GetMapping(produces = "text/html")
     public String openSimulatorWithAuthzCode(@RequestParam String code, @RequestParam String state) {
         OidcState oidcState = OidcState.fromBase64Json(state);
-        if (!oidcState.targetIosSimulators().isEmpty()) {
+        if (oidcState.isIosTargeted()) {
             lunchNordnetAppOnIosSimulators(code, oidcState);
+            return CLOSE_TAB_HTML.formatted(oidcState.targetIosSimulator().ios().name(), oidcState.targetIosSimulator().ios().name());
         }
-        return CLOSE_TAB_HTML;
+        return "Unsupported target device";
     }
 
     private void lunchNordnetAppOnIosSimulators(String code, OidcState oidcState) {
         List<IosSimulator> iosSimulatorsWithNordnetApp = IosSimulatorHelper.runningSimulatorsWithNordnetApp();
         if (iosSimulatorsWithNordnetApp.isEmpty()) {
-            throw new IllegalStateException("Running iOS simulator, with Nordnet app installed, NOT found!");
+            throw new IllegalStateException("NO running iOS simulator, with Nordnet app installed, found!");
         }
-        oidcState.targetIosSimulators()
-                .stream()
-                .filter(iosSimulatorsWithNordnetApp::contains)
-                .distinct()
-                .forEach(iosSimulator -> {
-                    // unfortunately this doesn't result in log out! manually log out in the app required
-                    IosSimulatorHelper.terminateNordnetApp(iosSimulator);
-                    IosSimulatorHelper.lunchNordnetApp(code, oidcState.country(), iosSimulator);
-                });
+        if (iosSimulatorsWithNordnetApp.contains(oidcState.targetIosSimulator().ios())) {
+            // unfortunately this doesn't result in log out! manually log out in the app required
+            IosSimulatorHelper.terminateNordnetApp(oidcState.targetIosSimulator().ios());
+            IosSimulatorHelper.lunchNordnetApp(code, oidcState.country(), oidcState.targetIosSimulator().ios());
+        }
     }
 }
