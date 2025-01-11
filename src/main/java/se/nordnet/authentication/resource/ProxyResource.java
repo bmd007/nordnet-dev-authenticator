@@ -9,12 +9,6 @@ import se.nordnet.authentication.type.IosSimulator;
 import se.nordnet.authentication.type.OidcState;
 
 import java.util.List;
-import java.util.Optional;
-
-import static se.nordnet.authentication.IosSimulatorHelper.executeCommand;
-import static se.nordnet.authentication.IosSimulatorHelper.iosSimulatorsWithNordnetApp;
-import static se.nordnet.authentication.IosSimulatorHelper.lunchNordnetApp;
-import static se.nordnet.authentication.IosSimulatorHelper.terminateNordnetApp;
 
 @Slf4j
 @RestController
@@ -55,30 +49,25 @@ public class ProxyResource {
     @GetMapping(produces = "text/html")
     public String openSimulatorWithAuthzCode(@RequestParam String code, @RequestParam String state) {
         OidcState oidcState = OidcState.fromBase64Json(state);
-
-        List<IosSimulator> iosSimulators_WithNordetApp_id = iosSimulatorsWithNordnetApp();
-        if (iosSimulators_WithNordetApp_id.isEmpty()) {
-            throw new IllegalStateException("No iOS simulator with Nordnet app installed found");
+        if (!oidcState.targetIosSimulators().isEmpty()) {
+            lunchNordnetAppOnIosSimulators(code, oidcState);
         }
-        IosSimulator targetIosSimulator = Optional.ofNullable(oidcState)
-                .map(OidcState::targetIosSimulator)
-                .filter(iosSimulators_WithNordetApp_id::contains)
-                .orElseGet(() -> iosSimulators_WithNordetApp_id.get(0));
-        terminateNordnetApp(targetIosSimulator);
-        waitForNordnetAppTermination(targetIosSimulator);
-        lunchNordnetApp(code, oidcState.country(), targetIosSimulator);
-
         return CLOSE_TAB_HTML;
     }
 
-    private static void waitForNordnetAppTermination(IosSimulator targetIosSimulator) {
-        while (IosSimulatorHelper.isNordeAppRunning(targetIosSimulator)) {
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                log.error("Error waiting for Nordnet app to terminate", e);
-            }
+    private void lunchNordnetAppOnIosSimulators(String code, OidcState oidcState) {
+        List<IosSimulator> iosSimulatorsWithNordnetApp = IosSimulatorHelper.runningSimulatorsWithNordnetApp();
+        if (iosSimulatorsWithNordnetApp.isEmpty()) {
+            throw new IllegalStateException("Running IOS simulator, with Nordnet app installed, NOT found!");
         }
+        List<IosSimulator> targetIosSimulators = oidcState.targetIosSimulators().stream()
+                .filter(iosSimulatorsWithNordnetApp::contains).distinct().toList();
+        if (targetIosSimulators.isEmpty()) {
+            targetIosSimulators = List.of(iosSimulatorsWithNordnetApp.get(0));
+        }
+        targetIosSimulators.forEach(iosSimulator -> {
+            IosSimulatorHelper.terminateNordnetApp(iosSimulator);// unfortunately this doesn't result in log out! manually log out in the app required
+            IosSimulatorHelper.lunchNordnetApp(code, oidcState.country(), iosSimulator);
+        });
     }
-
 }
