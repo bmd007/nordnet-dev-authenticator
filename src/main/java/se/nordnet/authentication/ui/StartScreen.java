@@ -182,7 +182,7 @@ public class StartScreen {
 
         JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         buttonsPanel.setBackground(CARD_BACKGROUND);
-        iosSimulatorLoginPanel(customer, buttonsPanel);
+        addStyledButton(buttonsPanel, "iOS Simulator", e1 -> openBrowserForLoginOnIosSimulator(customer));
         addStyledButton(buttonsPanel, "Webapp next test", e -> openBrowserForLoginOnWebAppNextTestEnv(customer));
         addStyledButton(buttonsPanel, "Webapp next local", e -> openBrowserForLoginOnWebAppNextLocal(customer));
         addStyledButton(buttonsPanel, "Android emulator", e -> {
@@ -190,13 +190,6 @@ public class StartScreen {
         card.add(buttonsPanel, BorderLayout.CENTER);
 
         return card;
-    }
-
-    private void iosSimulatorLoginPanel(Customer customer, JPanel buttonsPanel) {
-        List<IosSimulator> targetIosSimulators = loginOnAllSimulatorsCheckBox.isSelected() ?
-                IosSimulatorHelper.runningSimulatorsWithNordnetApp() :
-                List.of(IosSimulatorHelper.runningSimulatorsWithNordnetApp().get(0));
-        addStyledButton(buttonsPanel, "iOS Simulator", e -> openBrowserForLoginOnIosSimulator(customer, targetIosSimulators));
     }
 
     private JPanel createCustomerInfoPanel(Customer customer) {
@@ -263,7 +256,10 @@ public class StartScreen {
         customerCardsPanel.repaint();
     }
 
-    private void openBrowserForLoginOnIosSimulator(Customer customer, List<IosSimulator> targetIosSimulators) {
+    private void openBrowserForLoginOnIosSimulator(Customer customer) {
+        List<IosSimulator> targetIosSimulators = loginOnAllSimulatorsCheckBox.isSelected() ?
+                IosSimulatorHelper.runningSimulatorsWithNordnetApp() :
+                List.of(IosSimulatorHelper.runningSimulatorsWithNordnetApp().get(0));
         String state = new OidcState(customer.country(), targetIosSimulators).getBase64Json();
         URI authorizationUri = getAuthorizationUrl(customer.getBase64Id(), "http://localhost:9070", state);
         openBrowser(authorizationUri);
