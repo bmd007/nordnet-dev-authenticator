@@ -204,7 +204,7 @@ public class StartScreen {
 
         JTextField prIdentifierField = new JTextField(10);
         prIdentifierField.setPreferredSize(new Dimension(100, 35));
-        prIdentifierField.putClientProperty("JTextField.placeholderText", "Web app next PR Identifier");
+        prIdentifierField.putClientProperty("JTextField.placeholderText", "Web app next PR Identifier or Alias (oidc, ace-oidc, webauthn)");
         prIdentifierField.setText("pr-6058");
 
         JLabel prLabel = new JLabel("PR identifier");

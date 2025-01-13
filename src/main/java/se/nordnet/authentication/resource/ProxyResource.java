@@ -69,7 +69,7 @@ public class ProxyResource {
             return CLOSE_TAB_HTML.formatted(oidcState.targetEnvironment().iosSimulator().name(), oidcState.targetEnvironment().iosSimulator().name());
         }
         if (oidcState.isWebAppNextStagingTargeted()) {
-            return redirectToUrlHtml(oidcState.targetEnvironment().webAppNextStaging().url(oidcState.country(), code));
+            redirectToUrlHtml(oidcState.targetEnvironment().webAppNextStaging().url(oidcState.country(), code));
         }
         return "Unsupported target device";
     }
