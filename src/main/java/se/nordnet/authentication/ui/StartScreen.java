@@ -7,7 +7,6 @@ import se.nordnet.authentication.IosSimulatorHelper;
 import se.nordnet.authentication.property.CustomerProperties;
 import se.nordnet.authentication.type.Customer;
 import se.nordnet.authentication.type.IosSimulator;
-import se.nordnet.authentication.type.TargetEnvironment;
 import se.nordnet.authentication.type.OidcState;
 import se.nordnet.authentication.type.WebAppNextStaging;
 
@@ -59,7 +58,7 @@ public class StartScreen {
 
     private void setupMainFrame() {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setMinimumSize(new Dimension(1200, 800));
+        frame.setMinimumSize(new Dimension(1200, 1024));
 
         // Set custom look and feel
         try {
@@ -172,7 +171,7 @@ public class StartScreen {
 
     private JPanel createCustomerCard(Customer customer) {
         JPanel card = new JPanel();
-        card.setLayout(new BorderLayout(10, 10));
+        card.setLayout(new BorderLayout(4, 4));
         card.setBackground(CARD_BACKGROUND);
         card.setBorder(new CompoundBorder(
                 new LineBorder(new Color(230, 230, 230)),
@@ -184,14 +183,43 @@ public class StartScreen {
 
         JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         buttonsPanel.setBackground(CARD_BACKGROUND);
-        buttonsPanel.add(loginButton( "iOS Simulator", e1 -> openBrowserForLoginOnIosSimulator(customer)));
-        buttonsPanel.add(loginButton( "Webapp next test", e -> openBrowserForLoginOnWebAppNextTestEnv(customer)));
-        buttonsPanel.add(loginButton( "Webapp next local", e -> openBrowserForLoginOnWebAppNextLocal(customer)));
+        buttonsPanel.add(simulatorsLoginPanel(customer));
+        buttonsPanel.add(webAppNextTestAndLocalLoginButtons(customer));
         buttonsPanel.add(webAppNextStagingLoginSection(customer));
-//        buttonsPanel.add(loginButton( "Android emulator", e -> {}));
         card.add(buttonsPanel, BorderLayout.CENTER);
 
         return card;
+    }
+
+    private JPanel simulatorsLoginPanel(Customer customer){
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        panel.setBackground(CARD_BACKGROUND);
+        panel.setBorder(BorderFactory.createCompoundBorder(
+                new LineBorder(new Color(230, 230, 230)),
+                new EmptyBorder(15, 15, 15, 15)
+        ));
+
+        panel.add(loginButton("iOS Simulator", e1 -> openBrowserForLoginOnIosSimulator(customer)), BorderLayout.NORTH);
+        panel.add(loginButton( "Android emulator", e -> {}), BorderLayout.SOUTH);
+
+        return panel;
+    }
+
+    private JPanel webAppNextTestAndLocalLoginButtons(Customer customer) {
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        panel.setBackground(CARD_BACKGROUND);
+        panel.setBorder(BorderFactory.createCompoundBorder(
+                new LineBorder(new Color(230, 230, 230)),
+                new EmptyBorder(15, 15, 15, 15)
+        ));
+
+        JButton webappNextTestLoginButton = loginButton("Webapp next test", e -> openBrowserForLoginOnWebAppNextTestEnv(customer));
+        JButton webappNextLocalLoginButton = loginButton("Webapp next local", e -> openBrowserForLoginOnWebAppNextLocal(customer));
+
+        panel.add(webappNextTestLoginButton, BorderLayout.NORTH);
+        panel.add(webappNextLocalLoginButton, BorderLayout.SOUTH);
+
+        return panel;
     }
 
     private JPanel webAppNextStagingLoginSection(Customer customer) {
@@ -235,8 +263,10 @@ public class StartScreen {
     }
 
     private JPanel createCustomerInfoPanel(Customer customer) {
-        JPanel infoPanel = new JPanel(new BorderLayout());
+        JPanel infoPanel = new JPanel();
+        infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
         infoPanel.setBackground(CARD_BACKGROUND);
+        infoPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0)); // Remove any border
 
         JLabel nameLabel = new JLabel(customer.name());
         nameLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
@@ -250,9 +280,10 @@ public class StartScreen {
         customerIdLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         customerIdLabel.setForeground(new Color(128, 128, 128));
 
-        infoPanel.add(nameLabel, BorderLayout.NORTH);
-        infoPanel.add(countryLabel, BorderLayout.CENTER);
-        infoPanel.add(customerIdLabel, BorderLayout.SOUTH);
+        infoPanel.add(nameLabel);
+        infoPanel.add(countryLabel);
+        infoPanel.add(customerIdLabel);
+
         return infoPanel;
     }
 
