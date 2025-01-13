@@ -204,7 +204,8 @@ public class StartScreen {
 
         JTextField prIdentifierField = new JTextField(10);
         prIdentifierField.setPreferredSize(new Dimension(100, 35));
-        prIdentifierField.putClientProperty("JTextField.placeholderText", "Web app next PR Number");
+        prIdentifierField.putClientProperty("JTextField.placeholderText", "Web app next PR Identifier");
+        prIdentifierField.setText("pr-6058");
 
         JLabel prLabel = new JLabel("PR identifier");
         prLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
