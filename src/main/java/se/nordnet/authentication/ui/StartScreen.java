@@ -7,8 +7,9 @@ import se.nordnet.authentication.IosSimulatorHelper;
 import se.nordnet.authentication.property.CustomerProperties;
 import se.nordnet.authentication.type.Customer;
 import se.nordnet.authentication.type.IosSimulator;
-import se.nordnet.authentication.type.MobileSimulator;
+import se.nordnet.authentication.type.TargetEnvironment;
 import se.nordnet.authentication.type.OidcState;
+import se.nordnet.authentication.type.WebAppNextStaging;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -177,20 +178,59 @@ public class StartScreen {
                 new LineBorder(new Color(230, 230, 230)),
                 new EmptyBorder(15, 15, 15, 15)
         ));
-        card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100));
+        card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 150));
 
         card.add(createCustomerInfoPanel(customer), BorderLayout.WEST);
 
         JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         buttonsPanel.setBackground(CARD_BACKGROUND);
-        addStyledButton(buttonsPanel, "iOS Simulator", e1 -> openBrowserForLoginOnIosSimulator(customer));
-        addStyledButton(buttonsPanel, "Webapp next test", e -> openBrowserForLoginOnWebAppNextTestEnv(customer));
-        addStyledButton(buttonsPanel, "Webapp next local", e -> openBrowserForLoginOnWebAppNextLocal(customer));
-        addStyledButton(buttonsPanel, "Android emulator", e -> {
-        });
+        buttonsPanel.add(loginButton( "iOS Simulator", e1 -> openBrowserForLoginOnIosSimulator(customer)));
+        buttonsPanel.add(loginButton( "Webapp next test", e -> openBrowserForLoginOnWebAppNextTestEnv(customer)));
+        buttonsPanel.add(loginButton( "Webapp next local", e -> openBrowserForLoginOnWebAppNextLocal(customer)));
+        buttonsPanel.add(webAppNextStagingLoginSection(customer));
+//        buttonsPanel.add(loginButton( "Android emulator", e -> {}));
         card.add(buttonsPanel, BorderLayout.CENTER);
 
         return card;
+    }
+
+    private JPanel webAppNextStagingLoginSection(Customer customer) {
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        panel.setBackground(CARD_BACKGROUND);
+        panel.setBorder(BorderFactory.createCompoundBorder(
+                new LineBorder(new Color(230, 230, 230)),
+                new EmptyBorder(15, 15, 15, 15)
+        ));
+
+        JTextField prIdentifierField = new JTextField(10);
+        prIdentifierField.setPreferredSize(new Dimension(100, 35));
+        prIdentifierField.putClientProperty("JTextField.placeholderText", "Web app next PR Number");
+
+        JLabel prLabel = new JLabel("PR identifier");
+        prLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        prLabel.setForeground(new Color(128, 128, 128));
+
+        JPanel inputPanel = new JPanel(new BorderLayout(5, 5));
+        inputPanel.setBackground(CARD_BACKGROUND);
+        inputPanel.add(prLabel, BorderLayout.WEST);
+        inputPanel.add(prIdentifierField, BorderLayout.CENTER);
+
+        JButton webappNextStagingLoginButton = loginButton("Webapp next staging", e -> {
+            String prIdentifier = prIdentifierField.getText();
+            if (!prIdentifier.isEmpty()) {
+                String state = OidcState.forWebAppNextStaging(customer.country(), new WebAppNextStaging(prIdentifier)).getBase64Json();
+                URI authorizationUri = getAuthorizationUrl(customer.getBase64Id(), "http://localhost:9070", state);
+                openBrowser(authorizationUri);
+            } else {
+                log.error("PR Number is required for Webapp next staging login");
+                //todo warn user using a pop up
+            }
+        });
+
+        panel.add(webappNextStagingLoginButton, BorderLayout.NORTH);
+        panel.add(inputPanel, BorderLayout.SOUTH);
+
+        return panel;
     }
 
     private JPanel createCustomerInfoPanel(Customer customer) {
@@ -215,7 +255,7 @@ public class StartScreen {
         return infoPanel;
     }
 
-    private void addStyledButton(JPanel panel, String text, java.awt.event.ActionListener listener) {
+    private JButton loginButton(String text, java.awt.event.ActionListener listener) {
         JButton button = new JButton(text);
         button.setPreferredSize(new Dimension(170, 35));
         button.setBorderPainted(true);
@@ -234,8 +274,7 @@ public class StartScreen {
                 button.setBackground(NORDNET_BLUE);
             }
         });
-
-        panel.add(button);
+        return button;
     }
 
     private void filterCustomers(String query) {
@@ -262,8 +301,7 @@ public class StartScreen {
                 IosSimulatorHelper.runningSimulatorsWithNordnetApp() :
                 List.of(IosSimulatorHelper.runningSimulatorsWithNordnetApp().get(0));
         targetIosSimulators.forEach(iosSimulator -> {
-            MobileSimulator targetSimulator = new MobileSimulator(iosSimulator);
-            String state = new OidcState(customer.country(), targetSimulator).getBase64Json();
+            String state = OidcState.forIosSimulator(customer.country(), iosSimulator).getBase64Json();
             URI authorizationUri = getAuthorizationUrl(customer.getBase64Id(), "http://localhost:9070", state);
             openBrowser(authorizationUri);
         });

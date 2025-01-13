@@ -43,15 +43,33 @@ public class ProxyResource {
                 <p class="message">This window/tab will be closed automatically in <span id="timer">5</span> seconds.</p>
             </body>
             </html>
-            """;
+            """.trim().strip();
 
-    // TODO support Android
+    private String redirectToUrlHtml(String url) {
+        return """
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta http-equiv="refresh" content="0;url=%s">
+                    <title>Redirecting to %s</title>
+                </head>
+                <body>
+                    <p>If you are not redirected automatically, follow this <a href="%s">link</a>.</p>
+                </body>
+                </html>
+                """.formatted(url, url, url);
+    }
+
     @GetMapping(produces = "text/html")
     public String openSimulatorWithAuthzCode(@RequestParam String code, @RequestParam String state) {
         OidcState oidcState = OidcState.fromBase64Json(state);
         if (oidcState.isIosTargeted()) {
             lunchNordnetAppOnIosSimulators(code, oidcState);
-            return CLOSE_TAB_HTML.formatted(oidcState.targetIosSimulator().ios().name(), oidcState.targetIosSimulator().ios().name());
+            return CLOSE_TAB_HTML.formatted(oidcState.targetEnvironment().iosSimulator().name(), oidcState.targetEnvironment().iosSimulator().name());
+        }
+        if (oidcState.isWebAppNextStagingTargeted()) {
+            return redirectToUrlHtml(oidcState.targetEnvironment().webAppNextStaging().url(oidcState.country(), code));
         }
         return "Unsupported target device";
     }
@@ -61,10 +79,10 @@ public class ProxyResource {
         if (iosSimulatorsWithNordnetApp.isEmpty()) {
             throw new IllegalStateException("NO running iOS simulator, with Nordnet app installed, found!");
         }
-        if (iosSimulatorsWithNordnetApp.contains(oidcState.targetIosSimulator().ios())) {
+        if (iosSimulatorsWithNordnetApp.contains(oidcState.targetEnvironment().iosSimulator())) {
             // unfortunately this doesn't result in log out! manually log out in the app required
-            IosSimulatorHelper.terminateNordnetApp(oidcState.targetIosSimulator().ios());
-            IosSimulatorHelper.lunchNordnetApp(code, oidcState.country(), oidcState.targetIosSimulator().ios());
+            IosSimulatorHelper.terminateNordnetApp(oidcState.targetEnvironment().iosSimulator());
+            IosSimulatorHelper.lunchNordnetApp(code, oidcState.country(), oidcState.targetEnvironment().iosSimulator());
         }
     }
 }

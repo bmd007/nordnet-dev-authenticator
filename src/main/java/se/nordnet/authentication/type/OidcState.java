@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.Base64;
 
-public record OidcState(@NotBlank String country, @NotNull MobileSimulator targetIosSimulator) {
+public record OidcState(@NotBlank String country, @NotNull TargetEnvironment targetEnvironment) {
 
     @JsonIgnore
     public String getBase64Json() {
@@ -28,11 +28,28 @@ public record OidcState(@NotBlank String country, @NotNull MobileSimulator targe
 
     @JsonIgnore
     public boolean isIosTargeted() {
-        return targetIosSimulator.ios() != null && targetIosSimulator.android() == null;
+        return targetEnvironment.iosSimulator() != null && targetEnvironment.androidEmulator() == null;
     }
 
     @JsonIgnore
     public boolean isAndroidTargeted() {
-        return targetIosSimulator.android() != null && targetIosSimulator.ios() == null;
+        return targetEnvironment.androidEmulator() != null && targetEnvironment.iosSimulator() == null;
+    }
+
+    @JsonIgnore
+    public boolean isWebAppNextStagingTargeted() {
+        return targetEnvironment.webAppNextStaging() != null && targetEnvironment.iosSimulator() == null && targetEnvironment.androidEmulator() == null;
+    }
+
+    public static OidcState forIosSimulator(String country, IosSimulator iosSimulator) {
+        return new OidcState(country, new TargetEnvironment(iosSimulator));
+    }
+
+    public static OidcState forAndroidEmulator(String country, AndroidEmulator androidEmulator) {
+        return new OidcState(country, new TargetEnvironment(androidEmulator));
+    }
+
+    public static OidcState forWebAppNextStaging(String country, WebAppNextStaging webAppNextStaging) {
+        return new OidcState(country, new TargetEnvironment(webAppNextStaging));
     }
 }
