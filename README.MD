@@ -1,10 +1,11 @@
 # Nordnet dev authenticator
 
-Use this application to easily login to test environments at Nordnet. 
+Use this application to easily log into non prod environments at Nordnet. 
  - Test environment of the mobile app in iOS simulator 
  - Test environment of the mobile app in Android emulator (TODO)
  - Test environment of the web app next (nordnet-test.xy)
  - Local environment of the web app next (nordnet-local.xy:8081)
+ - Staging environment(s) of the web app next (https://*.webapp-next.staging.nordnet-test.xy)
 
 ### Requirements for running
  - Java 17 (or higher)
@@ -30,3 +31,6 @@ Use this application to easily login to test environments at Nordnet.
     - Desktop shortcut icon
     - Add support for Android emulator
     - Automatically build the latest version of the app in github and send releases to company portal!
+
+### Architecture:
+![architecture.png](architecture.png)
