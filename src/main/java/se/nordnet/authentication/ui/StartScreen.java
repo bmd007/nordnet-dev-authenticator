@@ -177,7 +177,7 @@ public class StartScreen {
                 new LineBorder(new Color(230, 230, 230)),
                 new EmptyBorder(15, 15, 15, 15)
         ));
-        card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 150));
+        card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 170));
 
         card.add(createCustomerInfoPanel(customer), BorderLayout.WEST);
 
