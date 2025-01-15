@@ -19,12 +19,17 @@ Use this application to easily log into non prod environments at Nordnet.
         * The name field is just a way to call each customer (id). They are not referencing to anything like username or ... .
 
 ### How to run the application (on MacOS and Linux)
+    - Clone the repository locally
+    - `cd` to the repository root
+    - Make sure you are logged in to gcp (gcloud auth login ...)
     - Run `./gradlew bootRun` to start the application
     - `git pull` every now and again to get the latest features and customer(ids)
 
 ### Desktop shortcut:
     - `cd` to the project/repository root (important)
     - Run `./desktop-shortcut.sh`
+    
+    * To use the desktop shortcut, make sure you are logged in to gcp (gcloud auth login ...)
 
 ## TODO
     - App Icon
