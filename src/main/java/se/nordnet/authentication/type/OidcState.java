@@ -2,12 +2,16 @@ package se.nordnet.authentication.type;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 
 import java.util.Base64;
 
-public record OidcState(@NotBlank String country, @NotNull TargetEnvironment targetEnvironment) {
+public record OidcState(String country, TargetEnvironment targetEnvironment) {
+
+    public OidcState {
+        if (country.isBlank()) {
+            throw new IllegalArgumentException("Country must not be blank");
+        }
+    }
 
     @JsonIgnore
     public String getBase64Json() {

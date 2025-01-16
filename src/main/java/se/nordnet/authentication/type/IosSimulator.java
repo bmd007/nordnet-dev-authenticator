@@ -1,7 +1,13 @@
 package se.nordnet.authentication.type;
 
 
-import jakarta.validation.constraints.NotBlank;
-
-public record IosSimulator(@NotBlank String udid, @NotBlank String name) {
+public record IosSimulator(String udid, String name) {
+    public IosSimulator {
+        if (udid.isBlank()) {
+            throw new IllegalArgumentException("IosSimulator udid must not be blank");
+        }
+        if (name.isBlank()) {
+            throw new IllegalArgumentException("IosSimulator name must not be blank");
+        }
+    }
 }

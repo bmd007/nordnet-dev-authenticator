@@ -1,7 +1,13 @@
 package se.nordnet.authentication.type;
 
 
-import jakarta.validation.constraints.NotBlank;
-
-public record AndroidEmulator(@NotBlank String id, @NotBlank String name) {
+public record AndroidEmulator(String id, String name) {
+    public AndroidEmulator {
+        if (id.isBlank()) {
+            throw new IllegalArgumentException("AndroidEmulator id must not be blank");
+        }
+        if (name.isBlank()) {
+            throw new IllegalArgumentException("AndroidEmulator name must not be blank");
+        }
+    }
 }
