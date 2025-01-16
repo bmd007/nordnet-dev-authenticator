@@ -3,12 +3,12 @@ server.port: 9070
 test:
   env:
     customers:
-      - name: robsan
+      - alias: robsan
         id: e9a7b89d-1a2b-4f44-87ac-698c89bc7e11
         country: SE
-      - name: nextuser-se-1
+      - alias: nextuser-se-1
         id: d73b42b5-6d7b-4946-8485-add66228c123
         country: SE
-      - name: shareville-no-2
+      - alias: shareville-no-2
         id: 7270ff4e-0da6-4c24-b0ad-b7879037e8f6
         country: "NO"

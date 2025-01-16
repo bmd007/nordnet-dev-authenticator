@@ -268,7 +268,7 @@ public class StartScreen {
         infoPanel.setBackground(CARD_BACKGROUND);
         infoPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0)); // Remove any border
 
-        JLabel nameLabel = new JLabel(customer.name());
+        JLabel nameLabel = new JLabel(customer.alias());
         nameLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
         nameLabel.setForeground(TEXT_COLOR);
 
@@ -311,7 +311,7 @@ public class StartScreen {
 
     private void filterCustomers(String query) {
         List<Customer> filteredCustomers = customerProperties.customers().stream()
-                .filter(customer -> customer.name().toLowerCase().contains(query.toLowerCase()) ||
+                .filter(customer -> customer.alias().toLowerCase().contains(query.toLowerCase()) ||
                         customer.id().toLowerCase().contains(query.toLowerCase()))
                 .toList();
         filteredCustomers = filteredCustomers.isEmpty() ? customerProperties.customers().subList(0, 3) : filteredCustomers;
