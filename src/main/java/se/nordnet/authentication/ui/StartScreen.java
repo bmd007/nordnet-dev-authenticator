@@ -213,11 +213,13 @@ public class StartScreen {
                 new EmptyBorder(15, 15, 15, 15)
         ));
 
-        JButton webappNextTestLoginButton = loginButton("Webapp next test", e -> openBrowserForLoginOnWebAppNextTestEnv(customer));
-        JButton webappNextLocalLoginButton = loginButton("Webapp next local", e -> openBrowserForLoginOnWebAppNextLocal(customer));
+        JButton webappNextTestLoginButton = loginButton("nordnet-test.xy", e -> openBrowserForLoginOnWebAppNextTestEnv(customer));
+        JButton webappNextLocalLoginButton = loginButton("nordnet-local.xy:8081", e -> openBrowserForLoginOnWebAppNextLocal(customer));
+        JButton webappNextLocalPackageLoginButton = loginButton("localhost:8080", e -> openBrowserForLoginOnWebAppNextLocalPackage(customer));
 
         panel.add(webappNextTestLoginButton, BorderLayout.NORTH);
-        panel.add(webappNextLocalLoginButton, BorderLayout.SOUTH);
+        panel.add(webappNextLocalLoginButton, BorderLayout.CENTER);
+        panel.add(webappNextLocalPackageLoginButton, BorderLayout.SOUTH);
 
         return panel;
     }
@@ -346,6 +348,13 @@ public class StartScreen {
 
     private void openBrowserForLoginOnWebAppNextLocal(Customer customer) {
         URI authorizationUri = getAuthorizationUrl(customer.getBase64Id(), "https://www.nordnet-local.%s:8081/login".formatted(customer.country()), "MICROSOFT_ENTRAID_CARISMA");
+        openBrowser(authorizationUri);
+    }
+
+    private void openBrowserForLoginOnWebAppNextLocalPackage(Customer customer) {
+        log.warn("Web app next login in local packages does not support this method yet!");
+        String localPackageFriendlyState = "NORDNET_DEV_AUTHENTICATOR_8080_LOGIN_IN_COUNTRY_%s".formatted(customer.country());
+        URI authorizationUri = getAuthorizationUrl(customer.getBase64Id(), "localhost:8080", localPackageFriendlyState);
         openBrowser(authorizationUri);
     }
 

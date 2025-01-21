@@ -5,6 +5,7 @@ Use this application to easily log into Nordnet non prod environments:
  - Test environment of the mobile app in Android emulator (TODO)
  - Test environment of the web app next (nordnet-test.xy)
  - Local environment of the web app next (nordnet-local.xy:8081)
+ - Local environment of the web app next packages (localhost:8080)
  - Staging environment(s) of the web app next (https://*.webapp-next.staging.nordnet-test.xy)
 
 ## Requirements for running
