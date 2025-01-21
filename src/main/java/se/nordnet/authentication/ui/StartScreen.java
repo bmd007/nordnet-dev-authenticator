@@ -354,7 +354,7 @@ public class StartScreen {
     private void openBrowserForLoginOnWebAppNextLocalPackage(Customer customer) {
         log.warn("Web app next login in local packages does not support this method yet!");
         String localPackageFriendlyState = "NORDNET_DEV_AUTHENTICATOR_8080_LOGIN_IN_COUNTRY_%s".formatted(customer.country());
-        URI authorizationUri = getAuthorizationUrl(customer.getBase64Id(), "localhost:8080", localPackageFriendlyState);
+        URI authorizationUri = getAuthorizationUrl(customer.getBase64Id(), "http://localhost:8080", localPackageFriendlyState);
         openBrowser(authorizationUri);
     }
 
