@@ -17,6 +17,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
@@ -116,7 +117,7 @@ public class StartScreen {
         JPanel header = new JPanel(new BorderLayout(20, 20));
         header.setBackground(CARD_BACKGROUND);
         header.setBorder(new CompoundBorder(
-                new LineBorder(new Color(230, 230, 230)),
+                new LineBorder(new Color(230, 230, 250)),
                 new EmptyBorder(20, 20, 20, 20)
         ));
 
@@ -177,7 +178,7 @@ public class StartScreen {
                 new LineBorder(new Color(230, 230, 230)),
                 new EmptyBorder(15, 15, 15, 15)
         ));
-        card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 170));
+        card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 190));
 
         card.add(createCustomerInfoPanel(customer), BorderLayout.WEST);
 
@@ -200,7 +201,7 @@ public class StartScreen {
         ));
 
         panel.add(loginButton("iOS Simulator", e1 -> openBrowserForLoginOnIosSimulator(customer)), BorderLayout.NORTH);
-        panel.add(loginButton( "Android emulator", e -> {}), BorderLayout.SOUTH);
+        panel.add(loginButton("Android emulator", e -> JOptionPane.showMessageDialog(frame, "Not implemented yet")), BorderLayout.SOUTH);
 
         return panel;
     }
@@ -352,10 +353,10 @@ public class StartScreen {
     }
 
     private void openBrowserForLoginOnWebAppNextLocalPackage(Customer customer) {
-        log.warn("Web app next login in local packages does not support this method yet!");
-        String localPackageFriendlyState = "NORDNET_DEV_AUTHENTICATOR_8080_LOGIN_IN_COUNTRY_%s".formatted(customer.country());
-        URI authorizationUri = getAuthorizationUrl(customer.getBase64Id(), "http://localhost:8080", localPackageFriendlyState);
-        openBrowser(authorizationUri);
+        JOptionPane.showMessageDialog(frame, "Not implemented yet");
+//        String localPackageFriendlyState = "NORDNET_DEV_AUTHENTICATOR_8080_LOGIN_IN_COUNTRY_%s".formatted(customer.country());
+//        URI authorizationUri = getAuthorizationUrl(customer.getBase64Id(), "https://www.nordnet-local.%s:8080".formatted(customer.country()), "MICROSOFT_ENTRAID_CARISMA");
+//        openBrowser(authorizationUri);
     }
 
     private void openBrowser(URI url) {
