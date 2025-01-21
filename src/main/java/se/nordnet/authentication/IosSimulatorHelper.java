@@ -60,7 +60,7 @@ public class IosSimulatorHelper {
         }
     }
 
-    public static void lunchNordnetApp(String code, String country, IosSimulator iosSimulator) {
+    public static void launchNordnetApp(String code, String country, IosSimulator iosSimulator) {
         String udid = iosSimulator.udid();
         try {
             executeCommand("""

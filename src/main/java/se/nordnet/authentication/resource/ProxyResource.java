@@ -65,7 +65,7 @@ public class ProxyResource {
     public String openSimulatorWithAuthzCode(@RequestParam String code, @RequestParam String state) {
         OidcState oidcState = OidcState.fromBase64Json(state);
         if (oidcState.isIosTargeted()) {
-            lunchNordnetAppOnIosSimulators(code, oidcState);
+            launchNordnetAppOnIosSimulators(code, oidcState);
             return CLOSE_TAB_HTML.formatted(oidcState.targetEnvironment().iosSimulator().name(), oidcState.targetEnvironment().iosSimulator().name());
         }
         if (oidcState.isWebAppNextStagingTargeted()) {
@@ -74,7 +74,7 @@ public class ProxyResource {
         return "Unsupported target device";
     }
 
-    private void lunchNordnetAppOnIosSimulators(String code, OidcState oidcState) {
+    private void launchNordnetAppOnIosSimulators(String code, OidcState oidcState) {
         List<IosSimulator> iosSimulatorsWithNordnetApp = IosSimulatorHelper.runningSimulatorsWithNordnetApp();
         if (iosSimulatorsWithNordnetApp.isEmpty()) {
             throw new IllegalStateException("NO running iOS simulator, with Nordnet app installed, found!");
@@ -82,7 +82,7 @@ public class ProxyResource {
         if (iosSimulatorsWithNordnetApp.contains(oidcState.targetEnvironment().iosSimulator())) {
             // unfortunately this doesn't result in log out! manually log out in the app required
             IosSimulatorHelper.terminateNordnetApp(oidcState.targetEnvironment().iosSimulator());
-            IosSimulatorHelper.lunchNordnetApp(code, oidcState.country(), oidcState.targetEnvironment().iosSimulator());
+            IosSimulatorHelper.launchNordnetApp(code, oidcState.country(), oidcState.targetEnvironment().iosSimulator());
         }
     }
 }
